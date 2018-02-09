@@ -6,7 +6,7 @@ pdf: false
 tags: linux cloudera hadoop cloudera-api
 ---
 
-This is the second follow up post. In the earlier post [`Setting Up Cloudera Manager Services Using Cloudera API [Part 1]`](https://ahmedzbyr.github.io/setting-up-cloudera-manager-services/) we install the cloudera management services. Now we will be installing Zookeeper service to the cluster.
+This is the second follow up post. In the earlier post [`Setting Up Cloudera Manager Services Using Cloudera API [Part 1]`](https://github.com/ahmedzbyr/cloudera-api-starter/tree/master/2_cm_services_setup) we install the cloudera management services. Now we will be installing Zookeeper service to the cluster.
 
 But first we need to to couple of things before we install Zookeeper.
 
@@ -248,15 +248,11 @@ Our service should be up and running.
 
 ### Yaml File
 
-[Cloudera Zookeeper Yaml File](https://github.com/ahmedzbyr/getting_started_cloudera_api/blob/master/parcels_and_zookeeper_service_installation/cloudera_zookeeper.yaml)
-
-<script src="https://gist.github.com/ahmedzbyr/c032c384d42341258bd2da6311e9f1d3.js"></script>
+[Cloudera Zookeeper Yaml File](https://github.com/ahmedzbyr/cloudera-api-starter/blob/master/3_parcels_and_zookeeper_service_installation/cloudera_zookeeper.yaml)
 
 ### Code File.
 
-[Cloudera Zookeeper Service Code File](https://github.com/ahmedzbyr/getting_started_cloudera_api/blob/master/parcels_and_zookeeper_service_installation/cdh_cluster_parcel_zookeeper_service.py)
-
-<script src="https://gist.github.com/ahmedzbyr/547d401a3fcaa01eb83e5be89f62e653.js"></script>
+[Cloudera Zookeeper Service Code File](https://github.com/ahmedzbyr/cloudera-api-starter/blob/master/3_parcels_and_zookeeper_service_installation/cdh_cluster_parcel_zookeeper_service.py)
 
 
 ### Executing Code
