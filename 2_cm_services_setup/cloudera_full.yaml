@@ -1,0 +1,369 @@
+# Cloudera Manager config
+cm:
+  host: server-admin-node.ahmedinc.com
+  port: 7180
+  username: admin
+  password: admin
+  tls: false
+  api-version: 13
+  remote_parcel_repo_urls: http://192.168.10.115/cdh5/parcels/5.8.3,http://192.168.10.115/accumulo/parcels/1.4/,http://192.168.10.115/accumulo-c5/parcels/latest/,http://192.168.10.115/kafka/parcels/latest/,http://192.168.10.115/navigator-keytrustee5/parcels/latest/,http://192.168.10.115/spark/parcels/latest/,http://192.168.10.115/sqoop-connectors/parcels/latest/
+
+cm_ldap:
+  TSQUERY_STREAMS_LIMIT: 1000
+  LDAP_BIND_PW: P@ssw0rd@123
+  LDAP_USER_SEARCH_BASE: ou=useraccounts,ou=accounts,ou=accessmgmnt,dc=users,dc=ahmedinc,dc=com
+  LDAP_URL: ldap://adserver1.ahmedinc.com
+  LDAP_BIND_DN: CN=auth-usr,OU=serviceaccounts,OU=accounts,OU=accessmgmnt,DC=users,DC=ahmedinc,DC=com
+  AUTH_BACKEND_ORDER: LDAP_THEN_DB
+  KDC_TYPE: Active Directory
+  LDAP_GROUP_SEARCH_BASE: OU=logingroups,OU=accessmgmnt,DC=users,DC=ahmedinc,DC=com
+  NT_DOMAIN: users.ahmedinc.com
+  LDAP_ADMIN_GROUPS: bduser_admin
+
+cm_host_installation:
+  host_username: cmadmin
+  host_password: B!gD@t@
+  ssh_port: 22
+  host_cm_repo_url: http://192.168.10.115/cm5/redhat/6/x86_64/cm/5/
+  host_cm_repo_gpg_key_custom_url: http://192.168.10.115/cm5/redhat/6/x86_64/cm/RPM-GPG-KEY-cloudera
+  host_java_install_strategy: AUTO
+  host_unlimited_jce_policy: true
+
+# Basic cluster information
+cluster:
+  name: AutomatedHadoopCluster
+  version: CDH5
+  fullVersion: 5.8.3
+  hosts:
+     - server-admin-node.ahmedinc.com
+     - server-edge-node.ahmedinc.com
+     - server-worker-node.ahmedinc.com
+
+# Parcels
+parcels:
+  - repo:
+    product: CDH
+    version: 5.8.3-1.cdh5.8.3.p0.2
+  - repo:
+    product: KAFKA
+    version: 2.0.2-1.2.0.2.p0.5
+  - repo:
+    product: KEYTRUSTEE
+    version: 5.9.0-5.KEYTRUSTEE5.9.0.p0.17
+
+# Service. All the service definitions go here
+services:
+  MGMT:
+    roles:
+      - group: ACTIVITYMONITOR
+        hosts:
+          - server-admin-node.ahmedinc.com
+        config:
+          firehose_database_host: server-admin-node.ahmedinc.com:3306
+          firehose_database_user: amon
+          firehose_database_password: amon_password
+          firehose_database_type: mysql
+          firehose_database_name: amon
+      - group: ALERTPUBLISHER
+        hosts:
+          - server-admin-node.ahmedinc.com
+      - group: EVENTSERVER
+        hosts:
+          - server-admin-node.ahmedinc.com
+      - group: HOSTMONITOR
+        hosts:
+          - server-admin-node.ahmedinc.com
+      - group: SERVICEMONITOR
+        hosts:
+          - server-admin-node.ahmedinc.com
+      - group: REPORTSMANAGER
+        hosts:
+          - server-admin-node.ahmedinc.com
+        config:
+          headlamp_database_host: server-admin-node.ahmedinc.com:3306
+          headlamp_database_user: rman
+          headlamp_database_password: rman_password
+          headlamp_database_type: mysql
+          headlamp_database_name: rman
+      #- group: NAVIGATOR
+      #- group: NAVIGATORMETADATASTORE
+  ZOOKEEPER:
+    config:
+      zookeeper_datadir_autocreate: true
+    roles:
+      - group: SERVER
+        hosts:
+          - server-admin-node.ahmedinc.com
+          - server-edge-node.ahmedinc.com
+          - server-worker-node.ahmedinc.com
+
+        config:
+          quorumPort: 2888
+          electionPort: 3888
+          dataLogDir: /var/lib/zookeeper
+          dataDir: /var/lib/zookeeper
+  HDFS:
+    config:
+      dfs_replication: 3
+      dfs_permissions: false
+      dfs_block_local_path_access_user: impala,hbase,mapred,spark
+      zookeeper_service: ZOOKEEPER
+      trusted_realms: USERS.AHMEDINC.COM
+#      dfs_client_use_trash: true
+    roles:
+      - group: NAMENODE
+        hosts:
+          - server-admin-node.ahmedinc.com
+          - server-edge-node.ahmedinc.com
+        config:
+          dfs_name_dir_list: /data/1/dfs/nn,/data/10/dfs/nn
+          dfs_namenode_handler_count: 30
+          dfs_federation_namenode_nameservice: hdfsHA
+          dfs_namenode_quorum_journal_name: hdfsHA
+          autofailover_enabled: true
+      - group: JOURNALNODE
+        hosts:
+          - server-admin-node.ahmedinc.com
+          - server-edge-node.ahmedinc.com
+          - server-worker-node.ahmedinc.com
+        config:
+          dfs_journalnode_edits_dir: /journaldata/dfs/jn
+      - group: FAILOVERCONTROLLER
+        hosts:
+          - server-admin-node.ahmedinc.com
+          - server-edge-node.ahmedinc.com
+      - group: DATANODE
+        hosts:
+          - server-admin-node.ahmedinc.com
+          - server-edge-node.ahmedinc.com
+          - server-worker-node.ahmedinc.com
+        config:
+          #dfs_data_dir_list: /data/1/dfs/dn,/data/2/dfs/dn,/data/3/dfs/dn,/data/4/dfs/dn,/data/5/dfs/dn,/data/6/dfs/dn,/data/7/dfs/dn,/data/8/dfs/dn,/data/9/dfs/dn,/data/10/dfs/dn,/data/11/dfs/dn,/data/12/dfs/dn,/data/13/dfs/dn,/data/14/dfs/dn,/data/15/dfs/dn,/data/16/dfs/dn,/data/17/dfs/dn,/data/18/dfs/dn,/data/19/dfs/dn,/data/20/dfs/dn,/data/21/dfs/dn,/data/22/dfs/dn,/data/23/dfs/dn
+          dfs_data_dir_list: /data/1/dfs/dn,/data/2/dfs/dn,/data/3/dfs/dn,/data/4/dfs/dn,/data/5/dfs/dn,/data/6/dfs/dn,/data/7/dfs/dn,/data/8/dfs/dn,/data/9/dfs/dn,/data/10/dfs/dn,/data/11/dfs/dn,/data/12/dfs/dn,/data/13/dfs/dn,/data/14/dfs/dn,/data/15/dfs/dn,/data/16/dfs/dn,/data/17/dfs/dn,/data/18/dfs/dn
+          dfs_datanode_handler_count: 30
+          dfs_datanode_du_reserved: 1073741824
+          dfs_datanode_failed_volumes_tolerated: 0
+          dfs_datanode_data_dir_perm: 755
+      - group: GATEWAY
+        hosts:
+          - server-admin-node.ahmedinc.com
+          - server-edge-node.ahmedinc.com
+        config:
+          dfs_client_use_trash: true
+  YARN:
+    config:
+      hdfs_service: HDFS
+      zookeeper_service: ZOOKEEPER
+      yarn_rm_ha_cluster_id: yarnRM
+#      mapred_submit_replication: {{ groups['slave-nodes']|length }}
+    roles:
+      - group: RESOURCEMANAGER
+        hosts:
+          - server-admin-node.ahmedinc.com
+          - server-edge-node.ahmedinc.com
+      - group: JOBHISTORY
+        hosts:
+          - server-edge-node.ahmedinc.com
+      - group: NODEMANAGER
+        hosts:
+          - server-admin-node.ahmedinc.com
+          - server-edge-node.ahmedinc.com
+          - server-worker-node.ahmedinc.com
+        config:
+          yarn_nodemanager_local_dirs: /data/1/yarn/nm,/data/2/yarn/nm,/data/3/yarn/nm,/data/4/yarn/nm,/data/5/yarn/nm,/data/6/yarn/nm,/data/7/yarn/nm,/data/8/yarn/nm,/data/9/yarn/nm,/data/10/yarn/nm,/data/11/yarn/nm,/data/12/yarn/nm,/data/13/yarn/nm,/data/14/yarn/nm,/data/15/yarn/nm,/data/16/yarn/nm,/data/17/yarn/nm,/data/18/yarn/nm
+          yarn_nodemanager_log_dirs: /data/1/yarn/logs,/data/2/yarn/logs,/data/3/yarn/logs,/data/4/yarn/logs,/data/5/yarn/logs,/data/6/yarn/logs,/data/7/yarn/logs,/data/8/yarn/logs,/data/9/yarn/logs,/data/10/yarn/logs,/data/11/yarn/logs,/data/12/yarn/logs,/data/13/yarn/logs,/data/14/yarn/logs,/data/15/yarn/logs,/data/16/yarn/logs,/data/17/yarn/logs,/data/18/yarn/logs
+      - group: GATEWAY
+        config:
+          mapred_submit_replication: 3
+        hosts:
+          - server-admin-node.ahmedinc.com
+          - server-edge-node.ahmedinc.com
+  SPARK_ON_YARN:
+    config:
+      yarn_service: YARN
+    roles:
+      - group: SPARK_YARN_HISTORY_SERVER
+        hosts:
+          - server-admin-node.ahmedinc.com
+      - group: GATEWAY
+        hosts:
+          - server-admin-node.ahmedinc.com
+          - server-edge-node.ahmedinc.com
+          - server-worker-node.ahmedinc.com
+  HBASE:
+    config:
+      hdfs_service: HDFS
+      zookeeper_service: ZOOKEEPER
+      hbase_thriftserver_http: true
+      hbase_thriftserver_support_proxyuser: true
+    roles:
+      - group: MASTER
+        hosts:
+          - server-admin-node.ahmedinc.com
+      - group: REGIONSERVER
+        hosts:
+          - server-admin-node.ahmedinc.com
+          - server-edge-node.ahmedinc.com
+          - server-worker-node.ahmedinc.com
+      - group: HBASETHRIFTSERVER
+        hosts:
+          - server-edge-node.ahmedinc.com
+          - server-worker-node.ahmedinc.com
+      - group: HBASERESTSERVER
+        hosts:
+          - server-admin-node.ahmedinc.com
+      - group: GATEWAY
+        hosts:
+          - server-admin-node.ahmedinc.com
+          - server-edge-node.ahmedinc.com
+          - server-worker-node.ahmedinc.com
+  HIVE:
+    config:
+      hive_metastore_database_host: server-admin-node.ahmedinc.com
+      hive_metastore_database_name: metastore
+      hive_metastore_database_user: hive
+      hive_metastore_database_password: hive_password
+      hive_metastore_database_port: 3306
+      hive_metastore_database_type: mysql
+      mapreduce_yarn_service: YARN
+      spark_on_yarn_service: SPARK_ON_YARN
+      zookeeper_service: ZOOKEEPER
+      sentry_service: SENTRY
+      hbase_service: HBASE
+    roles:
+      - group: HIVEMETASTORE
+        config:
+          hive_metastore_java_heapsize: 128306784
+        hosts:
+          - server-admin-node.ahmedinc.com
+      - group: HIVESERVER2
+        config:
+          hiveserver2_enable_impersonation: false
+        hosts:
+          - server-admin-node.ahmedinc.com
+      - group: WEBHCAT
+        hosts:
+          - server-admin-node.ahmedinc.com
+      - group: GATEWAY
+        hosts:
+          - server-admin-node.ahmedinc.com
+          - server-edge-node.ahmedinc.com
+          - server-worker-node.ahmedinc.com
+  IMPALA:
+    config:
+      hdfs_service: HDFS
+      hive_service: HIVE
+      hbase_service: HBASE
+      sentry_service: SENTRY
+    roles:
+      - group: STATESTORE
+        hosts:
+          - server-admin-node.ahmedinc.com
+      - group: CATALOGSERVER
+        hosts:
+          - server-admin-node.ahmedinc.com
+      - group: IMPALAD
+        hosts:
+          - server-admin-node.ahmedinc.com
+          - server-edge-node.ahmedinc.com
+          - server-worker-node.ahmedinc.com
+  FLUME:
+    config:
+      hdfs_service: HDFS
+      hbase_service: HBASE
+    roles:
+      - group: AGENT
+        hosts:
+          - server-admin-node.ahmedinc.com
+  OOZIE:
+    config:
+      mapreduce_yarn_service: YARN
+      zookeeper_service: ZOOKEEPER
+      hive_service: HIVE
+    roles:
+      - group: OOZIE_SERVER
+        hosts:
+          - server-admin-node.ahmedinc.com
+        config:
+          oozie_database_host: server-admin-node.ahmedinc.com
+          oozie_database_name: oozie
+          oozie_database_user: oozie
+          oozie_database_password: oozie_password
+          oozie_database_type: mysql
+  SOLR:
+    config:
+      hdfs_service: HDFS
+      zookeeper_service: ZOOKEEPER
+    roles:
+      - group: SOLR_SERVER
+        hosts:
+          - server-admin-node.ahmedinc.com
+      - group: GATEWAY
+        hosts:
+          - server-admin-node.ahmedinc.com
+  HUE:
+    config:
+      hive_service: HIVE
+      hbase_service: HBASE
+      impala_service: IMPALA
+      oozie_service: OOZIE
+      sqoop_service: SQOOP
+      solr_service: SOLR
+      sentry_service: SENTRY
+      zookeeper_service: ZOOKEEPER
+      hue_webhdfs: HDFS-NAMENODE-1
+      hue_hbase_thrift: HBASE-HBASETHRIFTSERVER-1
+      auth_backend: desktop.auth.backend.PamBackend
+      database_host: server-admin-node.ahmedinc.com
+      database_name: hue
+      database_user: hue
+      database_password: hue_password
+      database_type: mysql
+      database_port: 3306
+    roles:
+      - group: HUE_SERVER
+        config:
+          hue_server_bind_wildcard: true
+        hosts:
+          - server-admin-node.ahmedinc.com
+  KAFKA:
+    config:
+      zookeeper_service: ZOOKEEPER
+      zookeeper.chroot: /kafka
+      default.replication.factor: 3
+    roles:
+      - group: KAFKA_BROKER
+        config:
+          log.dirs: /data/1/kafka/data,/data/2/kafka/data,/data/3/kafka/data,/data/4/kafka/data,/data/5/kafka/data,/data/6/kafka/data,/data/7/kafka/data,/data/8/kafka/data,/data/9/kafka/data,/data/10/kafka/data,/data/11/kafka/data,/data/12/kafka/data,/data/13/kafka/data,/data/14/kafka/data,/data/15/kafka/data,/data/16/kafka/data,/data/17/kafka/data,/data/18/kafka/data
+          broker_max_heap_size: 1024
+        hosts:
+          - server-admin-node.ahmedinc.com
+          - server-edge-node.ahmedinc.com
+          - server-worker-node.ahmedinc.com
+  SENTRY:
+    config:
+      zookeeper_service: ZOOKEEPER
+      hdfs_service: HDFS
+      sentry_server_database_host: server-admin-node.ahmedinc.com
+      sentry_server_database_name: sentry
+      sentry_server_database_user: sentry
+      sentry_server_database_password: sentry_password
+      sentry_server_database_type: mysql
+    roles:
+      - group: SENTRY_SERVER
+        hosts:
+          - server-admin-node.ahmedinc.com
+      - group: GATEWAY
+        hosts:
+          - server-admin-node.ahmedinc.com
+          - server-edge-node.ahmedinc.com
+          - server-worker-node.ahmedinc.com
+  SQOOP:
+    config:
+      mapreduce_yarn_service: YARN
+    roles:
+      - group: SQOOP_SERVER
+        config:
+          sqoop_java_heapsize: 207881018
+        hosts:
+          - server-admin-node.ahmedinc.com

@@ -1,0 +1,16 @@
+# Cloudera Manager config
+cm:
+  host: 127.0.0.1
+  port: 7180
+  username: admin
+  password: admin
+  tls: false
+  version: 13
+
+# Basic cluster information
+cluster:
+  name: AutomatedHadoopCluster
+  version: CDH5
+  fullVersion: 5.8.3
+  hosts:
+     - 127.0.0.1

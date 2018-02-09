@@ -1,0 +1,84 @@
+# Cloudera Manager config
+cm:
+  host: mycmhost.ahmed.com
+  port: 7180
+  username: admin
+  password: admin
+  tls: false
+  api-version: 13
+  remote_parcel_repo_urls: http://127.0.0.1/cdh5/parcels/5.8.3,http://192.168.10.115/accumulo/parcels/1.4/,http://192.168.10.115/accumulo-c5/parcels/latest/,http://192.168.10.115/kafka/parcels/latest/,http://192.168.10.115/navigator-keytrustee5/parcels/latest/,http://192.168.10.115/spark/parcels/latest/,http://192.168.10.115/sqoop-connectors/parcels/latest/
+
+cm_ldap:
+  TSQUERY_STREAMS_LIMIT: 1000
+
+cm_host_installation:
+  host_username: vagrant
+  host_password: vagrant
+  ssh_port: 22
+  host_cm_repo_url: http://127.0.0.1/cm5/redhat/6/x86_64/cm/5/
+  host_cm_repo_gpg_key_custom_url: http://127.0.0.1/cm5/redhat/6/x86_64/cm/RPM-GPG-KEY-cloudera
+  host_java_install_strategy: AUTO
+  host_unlimited_jce_policy: true
+
+# Basic cluster information
+cluster:
+  name: AutomatedHadoopCluster
+  version: CDH5
+  fullVersion: 5.8.3
+  hosts:
+     - mycmhost.ahmed.com
+
+# Parcels
+parcels:
+  - repo:
+    product: CDH
+    version: 5.8.3-1.cdh5.8.3.p0.2
+
+
+# Service. All the service definitions go here
+services:
+  MGMT:
+    roles:
+      - group: ACTIVITYMONITOR
+        hosts:
+          - mycmhost.ahmed.com
+        config:
+          firehose_database_host: mycmhost.ahmed.com:3306
+          firehose_database_user: amon
+          firehose_database_password: amon_password
+          firehose_database_type: mysql
+          firehose_database_name: amon
+      - group: ALERTPUBLISHER
+        hosts:
+          - mycmhost.ahmed.com
+      - group: EVENTSERVER
+        hosts:
+          - mycmhost.ahmed.com
+      - group: HOSTMONITOR
+        hosts:
+          - mycmhost.ahmed.com
+      - group: SERVICEMONITOR
+        hosts:
+          - mycmhost.ahmed.com
+      - group: REPORTSMANAGER
+        hosts:
+          - mycmhost.ahmed.com
+        config:
+          headlamp_database_host: mycmhost.ahmed.com:3306
+          headlamp_database_user: rman
+          headlamp_database_password: rman_password
+          headlamp_database_type: mysql
+          headlamp_database_name: rman
+
+  ZOOKEEPER:
+    config:
+      zookeeper_datadir_autocreate: true
+    roles:
+      - group: SERVER
+        hosts:
+          - mycmhost.ahmed.com
+        config:
+          quorumPort: 2888
+          electionPort: 3888
+          dataLogDir: /var/lib/zookeeper
+          dataDir: /var/lib/zookeeper
