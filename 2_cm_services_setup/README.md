@@ -31,7 +31,7 @@ Additionally, with the appropriate licenses, the API lets you:
 
 ### Prerequisites [IMPORTANT]
 
-**Assuming initial setup is complete. [Cloudera Manager Setup Using Chef](https://ahmedzbyr.github.io/chef-cloudera-manager-install-setup/)**
+**Assuming initial setup is complete. [Cloudera Manager Setup Using Chef](hhttps://github.com/ahmedzbyr/cdhmgr-chef-cookbook)**
 
 1. Mysql is install and all databases are created.
 2. Cloudera Manager server is installed and configured.
@@ -342,11 +342,11 @@ mgmt_service.start().wait()
 
 ### Yaml File
 
-<script src="https://gist.github.com/ahmedzbyr/42d02005b2b434138b3cc4c0ae905cf8.js"></script>
+<https://github.com/ahmedzbyr/cloudera-api-starter/blob/master/2_cm_services_setup/cloudera_mgmt.yaml>
 
 ### Code File
 
-<script src="https://gist.github.com/ahmedzbyr/d0658e427deb20bd9e0772808ac71085.js"></script>
+<https://github.com/ahmedzbyr/cloudera-api-starter/blob/master/2_cm_services_setup/cdh_api_mgmt_services.py>
 
 
 ### Executing Code.
