@@ -8,8 +8,8 @@ tags: linux cloudera hadoop cloudera-api zookeeper hdfs
 
 This is the second follow up post. In the earlier post 
 
-- [`Setting Up Cloudera Manager Services Using Cloudera API [Part 1]`](https://ahmedzbyr.github.io/setting-up-cloudera-manager-services/) , We installed the cloudera management services. 
-- [`Setting Up Zookeeper Services Using Cloudera API [Part 2]`](https://ahmedzbyr.github.io/setting-up-zookeeper-service-cloudera-api/) Installing Zookeeper service to the cluster.
+- [`Setting Up Cloudera Manager Services Using Cloudera API [Part 1]`](https://github.com/ahmedzbyr/cloudera-api-starter/tree/master/2_cm_services_setup) , We installed the cloudera management services. 
+- [`Setting Up Zookeeper Services Using Cloudera API [Part 2]`](https://github.com/ahmedzbyr/cloudera-api-starter/tree/master/3_parcels_and_zookeeper_service_installation) Installing Zookeeper service to the cluster.
 
 Now we will be installing the HDFS service to our cluster.
 
@@ -201,7 +201,7 @@ Creating `/tmp` is done using `create_hdfs_tmp` method which returns `ApiCommand
 
 ### Code Location
 
-[Code - Setting Up HDFS Services Using Cloudera API [Part 3]](https://github.com/ahmedzbyr/getting_started_cloudera_api/tree/master/hdfs_service_installation)
+[Code - Setting Up HDFS Services Using Cloudera API [Part 3]](https://github.com/ahmedzbyr/cloudera-api-starter/tree/master/4_hdfs_service_installation)
 
 ### Useful Links.
 
