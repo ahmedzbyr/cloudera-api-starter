@@ -49,21 +49,23 @@ We will be using centos 6 to setup our environment.
 
 First we get a API handle to use to connect to `Cloudera Manager Services` and `Cluster Services`. `config` is coming from a `yaml` file.
 
-	@property
-	def cm_api_handle(self):
-	
-	    """
-	        This method is to create a handle to CM.
-	    :return: cm_api_handle
-	    """
-	    if self._cm_api_handle is None:
-	        self._cm_api_handle = ApiResource(self.config['cm']['host'],
-	                                          self.config['cm']['port'],
-	                                          self.config['cm']['username'],
-	                                          self.config['cm']['password'],
-	                                          self.config['cm']['tls'],
-	                                          version=self.config['cm']['api-version'])
-	    return self._cm_api_handle
+``` python
+@property
+def cm_api_handle(self):
+
+    """
+	This method is to create a handle to CM.
+    :return: cm_api_handle
+    """
+    if self._cm_api_handle is None:
+	self._cm_api_handle = ApiResource(self.config['cm']['host'],
+					  self.config['cm']['port'],
+					  self.config['cm']['username'],
+					  self.config['cm']['password'],
+					  self.config['cm']['tls'],
+					  version=self.config['cm']['api-version'])
+    return self._cm_api_handle
+```
 
 A simple way to write it would be as below. (I am using version=13 here)
 
