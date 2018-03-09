@@ -1,0 +1,2076 @@
+{
+  "items" : [ {
+    "name" : "AD_ACCOUNT_PREFIX",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Active Directory Account Prefix",
+    "description" : "Prefix used in names while creating accounts in Active Directory. The prefix can be up to 10 characters long and can be set to identify accounts used for authentication by CDH processes. Used only if Active Directory KDC is used for authentication.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "AD_ACCOUNT_PROPERTIES",
+    "required" : false,
+    "default" : "accountExpires=0,objectClass=top,objectClass=person,objectClass=organizationalPerson,objectClass=user",
+    "displayName" : "Active Directory Account Properties",
+    "description" : "Active Directory account properties used in credential generation. Used only if Active Directory KDC is being used for authentication.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "AD_DELETE_ON_REGENERATE",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Active Directory Delete Accounts on Credential Regeneration",
+    "description" : "Set this option to true if regeneration of credentials should automatically delete the associated Active Directory accounts. Used only if Active Directory KDC is used for authentication.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "AD_KDC_DOMAIN",
+    "required" : false,
+    "default" : "ou=hadoop,DC=hadoop,DC=com",
+    "displayName" : "Active Directory Suffix",
+    "description" : "Active Directory suffix where all the accounts used by CDH daemons will be created. Used only if Active Directory KDC is being used for authentication.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "AD_LDAPS_PORT",
+    "required" : false,
+    "default" : "636",
+    "displayName" : "Active Directory LDAPS Port",
+    "description" : "Port to use for LDAP over TLS/SSL when using Active Directory for authentication.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "AD_PASSWORD_PROPERTIES",
+    "required" : false,
+    "default" : "length=12,minLowerCaseLetters=2,minUpperCaseLetters=2,minDigits=2,minSpaces=0,minSpecialChars=0,specialChars=?.!$%^*()-_+=~",
+    "displayName" : "Active Directory Password Properties",
+    "description" : "Active Directory password properties used in password generation. Used only if Active Directory KDC is being used for authentication.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "AD_SET_ENCRYPTION_TYPES",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Active Directory Set Encryption Types",
+    "description" : "Set this option to true if creation of Active Directory accounts should automatically turn on the associated encryption types represented by the msDS-EncryptionTypes field. Used only if Active Directory KDC is used for authentication.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "AGENT_PORT",
+    "required" : false,
+    "default" : "7182",
+    "displayName" : "Agent Port to connect to Server",
+    "description" : "Specify the port for Agents to use to connect to the Server. Must be 1024 or higher.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "AGENT_TLS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Use TLS Encryption for Agents",
+    "description" : "Select this option to enable TLS encryption between the Server and Agents.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "AGGREGATOR_METRICS",
+    "required" : false,
+    "default" : "[\n  {\n    \"name\": \"CPU Usage\",\n    \"query\": \"select last(moving_avg(cpu_percent_across_hosts, 300)) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Disk Utilization\",\n    \"query\": \"select last(moving_avg(utilization_across_disks, 300)) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Memory Utilization\",\n    \"query\": \"select last(moving_avg(total_physical_memory_used_across_hosts / total_physical_memory_total_across_hosts * 100, 300)) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Disk Read IO\",\n    \"query\": \"select last(moving_avg(total_read_bytes_rate_across_disks, 300)) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Disk Write IO\",\n    \"query\": \"select last(moving_avg(total_write_bytes_rate_across_disks, 300)) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Network Bytes Transmit\",\n    \"query\": \"select last(moving_avg(total_bytes_transmit_rate_across_network_interfaces, 300)) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Network Bytes Received\",\n    \"query\": \"select last(moving_avg(total_bytes_receive_rate_across_network_interfaces, 300)) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Capacity Total\",\n    \"query\": \"select last(total_dfs_capacity_across_hdfss) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Capacity Used (Absolute)\",\n    \"query\": \"select last(total_dfs_capacity_used_across_hdfss + total_dfs_capacity_used_non_hdfs_across_hdfss) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Capacity Used (Percentage)\",\n    \"query\": \"select last((total_dfs_capacity_used_across_hdfss + total_dfs_capacity_used_non_hdfs_across_hdfss) / total_dfs_capacity_across_hdfss) * 100 where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Transceivers\",\n    \"query\": \"select last(moving_avg(total_xceivers_across_datanodes, 300)) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Read IO\",\n    \"query\": \"select last(moving_avg(total_bytes_read_rate_across_datanodes, 300)) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Write IO\",\n    \"query\": \"select last(moving_avg(total_bytes_written_rate_across_datanodes, 300)) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Regions\",\n    \"query\": \"select last(total_regions_across_regionservers) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Regions in Transition\",\n    \"query\": \"select last(total_regions_in_transition_across_masters) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Longest Region in Transition\",\n    \"query\": \"select last(stats(regions_in_transition_longest_time_across_masters, max)) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Read Request Rate\",\n    \"query\": \"select last(moving_avg(total_read_requests_rate_across_regionservers, 300)) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Write Request Rate\",\n    \"query\": \"select last(moving_avg(total_write_requests_rate_across_regionservers, 300)) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Compaction Queue\",\n    \"query\": \"select last(moving_avg(total_compaction_queue_size_across_regionservers, 300)) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Flush Queue\",\n    \"query\": \"select last(moving_avg(total_flush_queue_size_across_regionservers, 300)) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Completed Queries\",\n    \"query\": \"select sum(total_num_queries_rate_across_impalads) where category=CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Sessions\",\n    \"query\": \"select last(moving_avg(total_thrift_server_beeswax_frontend_connections_in_use_across_impalads + total_thrift_server_hiveserver2_frontend_connections_in_use_across_impalads, 300)) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Completed Applications\",\n    \"query\": \"select sum(total_apps_completed_rate_across_yarn_pools) where category=CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Failed Applications\",\n    \"query\": \"select sum(total_apps_failed_rate_across_yarn_pools) where category=CLUSTER and clusterName = $CLUSTERNAME\"\n  },\n  {\n    \"name\": \"Pending Containers\",\n    \"query\": \"select last(moving_avg(total_pending_containers_across_yarn_pools, 300)) where category = CLUSTER and clusterName = $CLUSTERNAME\"\n  }\n]\n",
+    "displayName" : "Multi Cloudera Manager Dashboard Metrics",
+    "description" : "<p>Specifies the set of metrics fetched periodically from each Cloudera Manager by the back end. Metrics defined here are available for inclusion in Multi Cloudera Manager Dashboard profiles, which are used to configure which information is available on the dashboard.</p><p>Each metric has the following fields:</p><p><ul><li><code>name</code> <b>(mandatory)</b> - The name of the metric. This value must be unique across all metrics configured.</li><li><code>query</code> <b>(mandatory)</b> - A tsquery expression representing the metric. The tsquery expression is issued against a remote Cloudera Manager. Queries defined in this section are expected to return a scalar value. Using a fucntion like 'last', 'min', or 'max' is recommended. See the tsquery documentation for more details on how to construct queries.</li></ul></p><p>For example, the following metric could be defined to get CPU usage for all clusters from all Cloudera Manager intances. Cloudera supports fetching cluster level metrics by using 'clusterName = $CLUSTERNAME'. At runtime, the $CLUSTERNAME variable is substituted with the name of each cluster.</p><p><pre>\"name\": \"CPU Usage\",\n\"query\": \"select last(cpu_percent_across_hosts) where category = CLUSTER and clusterName = $CLUSTERNAME\"</pre></p>",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "ALLOW_USAGE_DATA",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Allow Usage Data Collection",
+    "description" : "Allows Cloudera to collect usage data, including the use of Google Analytics.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "AUTH_BACKEND_ORDER",
+    "required" : false,
+    "default" : "DB_ONLY",
+    "displayName" : "Authentication Backend Order",
+    "description" : "The order in which authentication back ends are used for authenticating a user. Emergency Administrator Access allows Full and User Administrators in the local database to authenticate if external authentication is not functioning.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "AUTH_SCRIPT",
+    "required" : false,
+    "default" : "",
+    "displayName" : "External Authentication Program Path",
+    "description" : "An external script (or binary) to use to authenticate users. Username is passed as the first command line argument. The password is passed over stdin. Program exit code should be 0 for successful authentication of a Read-Only user, 1 for successful authentication of a Full Administrator user, 2 for successful authentication of a Limited Operator user, 3 for successful authentication of an Operator user, 4 for successful authentication of a Configurator user, 5 for successful authentication of a Cluster Administrator user, 6 for successful authentication of a BDR Administrator user, 7 for successful authentication of a Navigator Administrator user, 8 for successful authentication of a User Administrator user, 9 for successful authentication of an Auditor user, 10 for successful authentication of a Key Administrator user, and a negative value for failure. A failure description can be printed to stderr.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "BDR_REPLICATION_KERBEROS_KEYTAB_LOCATION",
+    "required" : false,
+    "displayName" : "Custom Kerberos Keytab Location (to be used for replication for secure clusters on this Cloudera Manager)",
+    "description" : "Define a custom Kerberos keytab location on the Cloudera Manager host to use for replication. If this configuration is specified, the \"Custom Kerberos Principal Name\" must also be specified. The keytab should be owned by the user running the Cloudera Manager server process (typically \"cloudera-scm\") and should be configured with a filesystem access control of \"0400\".",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "BDR_REPLICATION_KERBEROS_PRINCIPAL_NAME",
+    "required" : false,
+    "displayName" : "Custom Kerberos Principal Name (to be used for replication for secure clusters on this Cloudera Manager)",
+    "description" : "Define a custom Kerberos principal name with an entry in the custom keytab defined in \"Custom Kerberos Keytab Location\". The principal should be a fully qualified name of an existing principal (eg. adminuser@MY.COMPANY.COM) and the principal must have an entry in the keytab specified in \"Custom Kerberos Keytab Location\". The principal should also be a superuser in all distributed file system services on secure clusters in this Cloudera Manager.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "CLIENT_CONFIG_AUTH",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Require Authentication to Download Client Configurations",
+    "description" : "When enabled, downloading client configurations through the API or through the URLs displayed in the UI requires normal authentication. When disabled, no authentication is required.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "CLUSTER_STATS_COUNT",
+    "required" : false,
+    "default" : "10",
+    "displayName" : "Number of Diagnostic Bundles to Keep",
+    "description" : "The maximum number of command results to keep before deleting them from local storage. This property is used for the commands that generate large result files. A value of -1 indicates no limit.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "CLUSTER_STATS_DEFAULT_SIZE_MB",
+    "required" : false,
+    "default" : "100",
+    "displayName" : "Scheduled Diagnostic Data Size (MB)",
+    "description" : "Approximate size in MB of scheduled diagnostic data bundle",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "CLUSTER_STATS_HTTP",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Use HTTPS to Upload Diagnostic Data",
+    "description" : "Whether to use HTTPS to upload diagnostic data bundles instead of the now-deprecated SFTP. Uses proxy settings from the network setting.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "CLUSTER_STATS_PATH",
+    "required" : false,
+    "displayName" : "Diagnostic Data Bundle Directory",
+    "description" : "Local directory to store diagnostic data bundles. Leave blank to store bundles for 24 hours. This directory must be writable by the cloudera-scm user.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "CLUSTER_STATS_SCHEDULE",
+    "required" : false,
+    "default" : "WEEKLY",
+    "displayName" : "Scheduled Diagnostic Data Collection Frequency",
+    "description" : "Frequency of automatically collecting diagnostic data and sending to Cloudera support.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "CLUSTER_STATS_START",
+    "value" : "10/27/2012 10:00",
+    "required" : false,
+    "displayName" : "Scheduled Diagnostic Data Collection Time",
+    "description" : "Time of day to collect and send diagnostic data to Cloudera",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "CLUSTER_STATS_TMP_PATH",
+    "required" : false,
+    "displayName" : "Diagnostic Data Temp Directory",
+    "description" : "Local path to assemble diagnostic data bundles. Leave blank to assemble these bundles in your JVM temp directory. Set this value if you run out of disk space while collecting diagnostic data.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "CM_HOST_NAME",
+    "required" : false,
+    "displayName" : "Cloudera Manager Hostname Override",
+    "description" : "Override to use for Cloudera Manager's hostname. Normally this is determined automatically, but this can be used if InetAddress.getLocalhost() is returning the loopback address.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "COMMAND_EVICTION_AGE_HOURS",
+    "required" : false,
+    "default" : "17520",
+    "displayName" : "Command Eviction Age",
+    "description" : "Length of time after which inactive commands are evicted from the database. Default is two years.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "COMMAND_STORAGE_PATH",
+    "required" : false,
+    "default" : "/var/lib/cloudera-scm-server",
+    "displayName" : "Cloudera Manager Server Local Data Storage Directory",
+    "description" : "Local path used by Cloudera Manager for storing data, including command result files. Note that changes to this configuration will only apply to commands started after the change. It is highly recommended that existing data be migrated over to the new location for the data to be accessible via and managed by Cloudera Manager.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "CROSS_ENTITY_AGGREGATE_FILTERS",
+    "required" : false,
+    "default" : "{\n  \"blacklist\": {\n    \"streams\" : [\n    ],\n    \"types\" : [\n      \"KUDU_REPLICA::KUDU_TABLET::STATISTICAL\"\n    ]\n  },\n  \"whitelist\": {\n    \"streams\" : [\n    ],\n    \"types\" : [\n    ]\n  }\n}",
+    "displayName" : "Cross Entity Aggregate Generation Filters",
+    "description" : "<p>Specifies two filters, a blacklist and a whitelist, that impact cross-entity aggregates generated by the Cloudera Manager monitoring system. By default, cross-entity aggregates are generated for all types. The blacklist entries can be used to disable generation of cross-entity aggregates, and whitelist entries can be used to force their creation.</p><p>The JSON structure of this field is as follows:</p><p><ul><li><code>blacklist</code> - A filter that when matched will prevent cross-entity aggregate creation. The structure of the filter is outlined below.</li><li><code>whitelist</code> - A filter that when matched will force cross-entity aggregate creation. The structure of the filter is outlined below. This filter takes precedence over the blacklist filter, so if both are matched, an aggregate will be generated.</li></ul></p><p>The JSON structure of either filter is as follows:</p><p><ul><li><code>types</code> - A list of entries in the following format <i>sourceType::targetType::aggregateMetricType</i>, e.g. DATANODE::RACK::STATISTICAL.</li><li><code>streams</code> - A list of entries in the following format <i>sourceType::targetType::metricName::aggregateMetricType</i>, e.g. HOST::CLUSTER::fd_open::TOTAL.</li></ul></p><p>In the above filters the source and target types are entity type strings used within the metric system. ROLE, SERVICE and ALL are wildcards that match all role types, service types and all types respectively. Metrics are referred to by their user facing names, so counter-based metrics will be in <i>_rate</i> form. The two types of aggregate metrics are TOTAL and STATISTICAL.</p><p>After making changes to this field, both the Cloudera Manager Server and the Service and Host Monitors should be restarted.</p><p>For advanced use only. You could break Cloudera Manager charting and health functionality by editing this field.</p>",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "CSD_REPO_ENABLED",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Local Descriptor Repository",
+    "description" : "When enabled, the server will read custom service descriptors from the local filesystem.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "CSD_REPO_PATH",
+    "required" : false,
+    "default" : "/opt/cloudera/csd",
+    "displayName" : "Local Descriptor Repository Path",
+    "description" : "Path to the local repository where custom service descriptors are located.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "CUSTOM_BANNER_HTML",
+    "required" : false,
+    "displayName" : "Custom Banner Text",
+    "description" : "The custom banner is used to display a customer specific text in the header area.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "CUSTOM_HEADER_COLOR",
+    "required" : false,
+    "default" : "BLACK",
+    "displayName" : "Custom Header Color",
+    "description" : "The custom header color is used to distinguish different instances of Cloudera Manager.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "CUSTOM_IA_POLICY",
+    "required" : false,
+    "displayName" : "Custom Information Assurance Policy Text",
+    "description" : "An information assurance policy statement that must be agreed to in order for a user to login.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "DIAG_BUNDLE_REDACTION_POLICY",
+    "required" : false,
+    "default" : "{\n  \"version\": 1,\n  \"rules\": [\n    {\n      \"description\": \"Redact passwords from json files\",\n      \"caseSensitive\": false,\n      \"trigger\": \"password\",\n      \"search\": \"\\\"password\\\"[ ]*:[ ]*\\\"[^\\\"]+\\\"\",\n      \"replace\": \"\\\"password\\\": \\\"BUNDLE-REDACTED\\\"\"\n    },\n    {\n      \"description\": \"Redact password= and password:\",\n      \"caseSensitive\": false,\n      \"trigger\": \"password\",\n      \"search\": \"password[:=][^ \\\"\\\\\\\\]+\",\n      \"replace\": \"password=BUNDLE-REDACTED\"\n    },\n    {\n      \"description\": \"Redact passwd= and passwd:\",\n      \"caseSensitive\": false,\n      \"trigger\": \"passwd\",\n      \"search\": \"passwd[:=][^ \\\"\\\\\\\\]+\",\n      \"replace\": \"passwd=BUNDLE-REDACTED\"\n    },\n    {\n      \"description\": \"Redact pass= and pass:\",\n      \"caseSensitive\": false,\n      \"trigger\": \"pass\",\n      \"search\": \"pass[:=][^ \\\"\\\\\\\\]+\",\n      \"replace\": \"pass=BUNDLE-REDACTED\"\n    },\n    {\n      \"description\": \"Redact key= and key:\",\n      \"caseSensitive\": false,\n      \"trigger\": \"key\",\n      \"search\": \"key[:=][^ \\\"\\\\\\\\]+\",\n      \"replace\": \"key=BUNDLE-REDACTED\"\n    },\n    {\n      \"description\": \"Redact secret= and secret:\",\n      \"caseSensitive\": false,\n      \"trigger\": \"secret\",\n      \"search\": \"secret[:=][^ \\\"\\\\\\\\]+\",\n      \"replace\": \"secret=BUNDLE-REDACTED\"\n    },\n    {\n      \"description\": \"Redact token= and token:\",\n      \"caseSensitive\": false,\n      \"trigger\": \"token\",\n      \"search\": \"token[:=][^ \\\"\\\\\\\\]+\",\n      \"replace\": \"token=BUNDLE-REDACTED\"\n    },\n    {\n      \"description\": \"Redact keyid= and keyid:\",\n      \"caseSensitive\": false,\n      \"trigger\": \"keyid\",\n      \"search\": \"keyid[:=][^ \\\"\\\\\\\\]+\",\n      \"replace\": \"keyid=BUNDLE-REDACTED\"\n    }\n  ]\n}\n",
+    "displayName" : "Redaction Parameters for Diagnostic Bundles",
+    "description" : "<p><b>Note:</b> Do not edit this property in the classic layout. Switch to the new layout to edit and test your rules inline.</p><p>Use this property to define a list of rules to be followed for redacting sensitive information from diagnostic bundles. Click + to add a new redaction rule. You can choose one of the preconfigured rules or add a custom rule. When specifying a custom rule, the Search field should contain a regular expression to be matched against the data. If a match is found, it is replaced by the contents of the Replace field.</p><p>Trigger is an optional field. It can be used to specify a simple string to be searched in the data. If the string is found, the redactor attempts to find a match for the Search regex. If no trigger is specified, redaction occurs by matching the Search regular expression. Use the Trigger field to enhance performance: simple string matching is faster than regular expression matching.</p><p>Test your rules by entering sample text into the Test Redaction Rules text box and clicking Test Redaction. If no rules match, the text you entered is returned unchanged.</p>",
+    "relatedName" : "",
+    "sensitive" : true,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "DISTRIBUTE_PARCELS_AUTOMATICALLY",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Automatically Distribute Available Parcels",
+    "description" : "Whether available parcels should be automatically distributed to any cluster that already has parcels of the same product.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "DOWNLOAD_PARCELS_AUTOMATICALLY",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Automatically Download New Parcels",
+    "description" : "Whether new parcels discovered on the remote parcel repository should be automatically downloaded.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "ENABLE_AGGREGATOR",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Multi Cloudera Manager Dashboard",
+    "description" : "Allows this Cloudera Manager to periodically collect and aggregate health and status data from other Cloudera Manager instances. Go to <a href=\"/cmf/aggregator/status\">Multi Cloudera Manager Dashboard</a>.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "ENABLE_API_DEBUG",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Enable Debugging of API",
+    "description" : "When enabled, the server log will contain traces of all API calls.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "ENABLE_EMBEDDED_DB_CHECK",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Embedded Database Check",
+    "description" : "When this option is unchecked, warnings about the embedded PostgreSQL database are suppressed.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "EVENTS_WIDGET_SEARCH_ON_LOAD",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Enable Events Widget Auto-Search",
+    "description" : "When enabled, the Events widget at the bottom of many pages will auto-fire its default search on page load.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "GEN_KEYTAB_SCRIPT",
+    "required" : false,
+    "displayName" : "Custom Kerberos Keytab Retrieval Script",
+    "description" : "Specify the path to a custom script (or executable) to retrieve a Kerberos keytab. The script should take two arguments: a destination file to write the keytab to, and the full principal name to retrieve the key for. If this property is specified, Cloudera Manager ignores all other properties specified for Kerberos setup.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "HEARTBEAT_INTERVAL",
+    "required" : false,
+    "default" : "15",
+    "displayName" : "Send Agent heartbeat every",
+    "description" : "The interval between each heartbeat that is sent from Agents to the server",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "HEARTBEAT_LOGGING_DIR",
+    "required" : false,
+    "displayName" : "Agent Heartbeat Logging Directory",
+    "description" : "Specifies the location where Agent heartbeat requests and responses should be logged, for debugging purposes. If empty, logging is disabled.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "HOME_PAGE_FULL_LIMIT",
+    "required" : false,
+    "default" : "2",
+    "displayName" : "Maximum Cluster Count Shown In Full",
+    "description" : "When the number of clusters exceeds this number, only the cluster summary information will be shown on the home page.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "HTTP_PORT",
+    "required" : false,
+    "default" : "7180",
+    "displayName" : "HTTP Port for Admin Console",
+    "description" : "Specify the HTTP port to use to access the Server via the Admin Console. Must be 1024 or higher.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "HTTPS_PORT",
+    "required" : false,
+    "default" : "7183",
+    "displayName" : "HTTPS Port for Admin Console",
+    "description" : "Specify the HTTPS port to use to access the Server via the Admin Console. Must be 1024 or higher.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "KDC_ACCOUNT_CREATION_HOST_OVERRIDE",
+    "required" : false,
+    "displayName" : "Active Directory Domain Controller Override",
+    "description" : "If multiple Active Directory Domain Controllers are behind a load-balancer, Cloudera Manager should be provided with the address of one of them. Cloudera Manager then sends commands to create accounts to that Domain Controller only. <b>Note:</b> This setting is used only while creating accounts. CDH services use the value entered in the KDC Server Host field only while authenticating.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "KDC_ADMIN_HOST",
+    "required" : false,
+    "displayName" : "KDC Admin Server Host",
+    "description" : "Host where the KDC Admin server is located. Port number is optional and can be provided as hostname[:port]",
+    "relatedName" : "admin_server",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "KDC_HOST",
+    "required" : false,
+    "displayName" : "KDC Server Host",
+    "description" : "Host where the KDC server is located. Port number is optional and can be provided as hostname[:port]",
+    "relatedName" : "kdc",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "KDC_TYPE",
+    "required" : false,
+    "default" : "MIT KDC",
+    "displayName" : "KDC Type",
+    "description" : "Type of KDC used for authentication in CDH clusters",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "KEYSTORE_PASSWORD",
+    "required" : false,
+    "displayName" : "Cloudera Manager TLS/SSL Server JKS Keystore File Password",
+    "description" : "The password for the Cloudera Manager JKS keystore file.",
+    "relatedName" : "",
+    "sensitive" : true,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "KEYSTORE_PATH",
+    "required" : false,
+    "displayName" : "Cloudera Manager TLS/SSL Server JKS Keystore File Location",
+    "description" : "The path to the TLS/SSL keystore file containing the server certificate and private key used for TLS/SSL. Used when Cloudera Manager is acting as a TLS/SSL server. The keystore must be in JKS format.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "KRB_DNS_LOOKUP_KDC",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "DNS Lookup KDC",
+    "description" : "Indicate whether DNS SRV records should be used to locate the KDCs and other servers for a realm, if they are not listed in the krb5.conf information for the realm.",
+    "relatedName" : "dns_lookup_kdc",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "KRB_DOMAIN",
+    "required" : false,
+    "displayName" : "Domain Name(s)",
+    "description" : "Domain(s) which are mapped to this Kerberos Realm. This is used to generate [domain_realm] section. Also, the first domain is used as default_domain in [realms] section",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "KRB_ENC_TYPES",
+    "required" : false,
+    "default" : "rc4-hmac",
+    "displayName" : "Kerberos Encryption Types",
+    "description" : "Encryption types supported by KDC. <b>Note:</b> To use AES encryption, make sure you have deployed JCE Unlimited Strength Policy File by following the instructions <a target=\"_blank\" href=\"http://tiny.cloudera.com/jce_policy\">here</a>.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "KRB_FORWARDABLE",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Forwardable Tickets",
+    "description" : "If this flag is true, initial tickets will be forwardable by default, if allowed by the KDC.",
+    "relatedName" : "forwardable",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "KRB_KDC_TIMEOUT",
+    "required" : false,
+    "default" : "3000",
+    "displayName" : "KDC Timeout",
+    "description" : "The maximum time to wait for a reply from the KDC. A time of 0 seconds means \"use the client's default\".",
+    "relatedName" : "kdc_timeout",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "KRB_LIBDEFAULTS_SAFETY_VALVE",
+    "required" : false,
+    "displayName" : "Advanced Configuration Snippet (Safety Valve) for [libdefaults] section of krb5.conf",
+    "description" : "For advanced use only. Any text here will be emitted verbatim in the <b>[libdefaults]</b> section of krb5.conf.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "KRB_MANAGE_KRB5_CONF",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Manage krb5.conf through Cloudera Manager",
+    "description" : "Whether Cloudera Manager should configure and deploy krb5.conf on secure clusters. If this property is not checked, then you must ensure that krb5.conf is deployed on hosts in a secure cluster as well as on Cloudera Manager Server's host.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "KRB_OTHER_SAFETY_VALVE",
+    "required" : false,
+    "displayName" : "Advanced Configuration Snippet (Safety Valve) for remaining krb5.conf",
+    "description" : "For advanced use only. Cloudera Manager configures the [libdefaults], [realms] and [domain_realm] section of krb5.conf. Any text here will be emitted verbatim after them in krb5.conf.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "KRB_REALMS_SAFETY_VALVE",
+    "required" : false,
+    "displayName" : "Advanced Configuration Snippet (Safety Valve) for the Default Realm in krb5.conf",
+    "description" : "For advanced use only. Any text here will be emitted verbatim in the <b>[realms]</b> section of krb5.conf for the <b>specified security realm</b>. If you want to add realms besides the default one, configure them using <b>Advanced Configuration Snippet (Safety Valve) for remaining krb5.conf</b>.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "KRB_RENEW_LIFETIME",
+    "required" : false,
+    "default" : "604800",
+    "displayName" : "Kerberos Renewable Lifetime",
+    "description" : "Default renewable lifetime for initial ticket requests.",
+    "relatedName" : "renew_lifetime",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "KRB_TICKET_LIFETIME",
+    "required" : false,
+    "default" : "86400",
+    "displayName" : "Kerberos Ticket Lifetime",
+    "description" : "Default lifetime for initial ticket requests.",
+    "relatedName" : "ticket_lifetime",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_ADMIN_GROUPS",
+    "required" : false,
+    "default" : "",
+    "displayName" : "LDAP Full Administrator Groups",
+    "description" : "A list of LDAP group names. If a user is a member of one of the configured groups, that user is granted Full admin access on login.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_AUDITOR_GROUPS",
+    "required" : false,
+    "default" : "",
+    "displayName" : "LDAP Auditor Groups",
+    "description" : "A list of LDAP group names. If a user is a member of one of the configured groups, that user is granted Auditor access on login.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_BDR_ADMIN_GROUPS",
+    "required" : false,
+    "default" : "",
+    "displayName" : "LDAP BDR Administrator Groups",
+    "description" : "A list of LDAP group names. If a user is a member of one of the configured groups, that user is granted BDR admin access on login.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_BIND_DN",
+    "required" : false,
+    "displayName" : "LDAP Bind User Distinguished Name",
+    "description" : "Distinguished name of the user to bind as. This is used to connect to LDAP/AD for searching user and group information. This may be left blank if the LDAP server supports anonymous binds.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_BIND_PW",
+    "required" : false,
+    "displayName" : "LDAP Bind Password",
+    "description" : "The password of the bind user.",
+    "relatedName" : "",
+    "sensitive" : true,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_CLUSTER_ADMIN_GROUPS",
+    "required" : false,
+    "default" : "",
+    "displayName" : "LDAP Cluster Administrator Groups",
+    "description" : "A list of LDAP group names. If a user is a member of one of the configured groups, that user is granted Cluster admin access on login.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_CONFIGURATOR_GROUPS",
+    "required" : false,
+    "default" : "",
+    "displayName" : "LDAP Configurator Groups",
+    "description" : "A list of LDAP group names. If a user is a member of one of the configured groups, that user is granted configurator access on login.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_DN_PATTERN",
+    "required" : false,
+    "displayName" : "LDAP Distinguished Name Pattern",
+    "description" : "For use with non-Active Directory LDAP systems. This is a pattern that will be used to search for the distinguished name of a user during authentication. Use \"{0}\" to specify where the username should go, e.g. \"uid={0},ou=People\".",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_GROUP_SEARCH_BASE",
+    "required" : false,
+    "displayName" : "LDAP Group Search Base",
+    "description" : "A base distinguished name for searching for groups.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_GROUP_SEARCH_FILTER",
+    "required" : false,
+    "displayName" : "LDAP Group Search Filter",
+    "description" : "A search filter for finding groups. Typically, this will be (member={0}), where {0} will be replaced by the DN of a successfully authenticated user.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_KEY_ADMIN_GROUPS",
+    "required" : false,
+    "default" : "",
+    "displayName" : "LDAP Key Administrator Groups",
+    "description" : "A list of LDAP group names. If a user is a member of one of the configured groups, that user is granted Key Administrator access on login.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_LIMITED_GROUPS",
+    "required" : false,
+    "default" : "",
+    "displayName" : "LDAP Limited Operator Groups",
+    "description" : "A list of LDAP group names. If a user is a member of one of the configured groups, that user is granted limited operator access on login.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_NAVIGATOR_ADMIN_GROUPS",
+    "required" : false,
+    "default" : "",
+    "displayName" : "LDAP Navigator Administrator Groups",
+    "description" : "A list of LDAP group names. If a user is a member of one of the configured groups, that user is granted Navigator admin access on login.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_OPERATOR_GROUPS",
+    "required" : false,
+    "default" : "",
+    "displayName" : "LDAP Operator Groups",
+    "description" : "A list of LDAP group names. If a user is a member of one of the configured groups, that user is granted operator access on login.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_TYPE",
+    "required" : false,
+    "default" : "ACTIVE_DIRECTORY",
+    "displayName" : "External Authentication Type",
+    "description" : "The type of external authentication to use.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "LDAP_URL",
+    "required" : false,
+    "displayName" : "LDAP URL",
+    "description" : "<p>The URL of the LDAP server. The URL must be prefixed with ldap:// or ldaps://. The URL can optionally specify a custom port, for example: ldaps://ldap_server.example.com:1636. Note that usernames and passwords will be transmitted in the clear unless either an ldaps:// URL is used, or \"Enable LDAP TLS\" is turned on (where available). Also note that encryption must be in use between the client and this service for the same reason.</p><p>For more detail on the LDAP URL format, see <a target=\"_blank\" href=\"http://www.ietf.org/rfc/rfc2255.txt\">RFC 2255 <i class=\"externalLink\"></i></a>. A space-separated list of URLs can be entered; in this case the URLs will each be tried in turn until one replies.</p>",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_USER_ADMIN_GROUPS",
+    "required" : false,
+    "default" : "",
+    "displayName" : "LDAP User Administrator Groups",
+    "description" : "A list of LDAP group names. If a user is a member of one of the configured groups, that user is granted User admin access on login.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_USER_GROUPS",
+    "required" : false,
+    "default" : "",
+    "displayName" : "LDAP User Groups",
+    "description" : "A list of LDAP group names. If a user is not a member of one of the configured groups, that user is prevented from logging into Cloudera Manager. If this is left empty, all LDAP users can log in.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_USER_SEARCH_BASE",
+    "required" : false,
+    "displayName" : "LDAP User Search Base",
+    "description" : "A base distinguished name for searching for users. This may be used as a fallback mechanism if the DN pattern does not match any user.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "LDAP_USER_SEARCH_FILTER",
+    "required" : false,
+    "displayName" : "LDAP User Search Filter",
+    "description" : "A search filter for finding users. Typically, this will be (uid={0}), where {0} will be replaced by the username that was used at the login screen.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "MANAGES_PARCELS",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Cloudera Manager Manages Parcels",
+    "description" : "Whether Cloudera Manager should manage which parcels should be present on all managed hosts.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "MAX_RENEW_LIFE",
+    "required" : false,
+    "default" : "432000",
+    "displayName" : "Maximum Renewable Life for Principals",
+    "description" : "Maximum renewable lifetime for Kerberos principals generated by Cloudera Manager. This property is used only if MIT KDC is used. Set this property to zero if the KDC should provide the maximum renewable lifetime. <b>Note: </b> Principals with non-renewable tickets are not recommended because they can prevent Hadoop services from functioning.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "MISSED_HB_BAD",
+    "required" : false,
+    "default" : "10",
+    "displayName" : "Set health status to Bad if the Agent heartbeats fail",
+    "description" : "If an Agent fails to send this number of expected consecutive heartbeats to the Server, a \"Bad\" health status is assigned to that Agent.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "MISSED_HB_CONCERNING",
+    "required" : false,
+    "default" : "5",
+    "displayName" : "Set health status to Concerning if the Agent heartbeats fail",
+    "description" : "If an Agent fails to send this number of expected consecutive heartbeats to the Server, a \"Concerning\" health status is assigned to that Agent.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "NEED_AGENT_HOSTNAME_VALIDATION",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Verify Agent Hostname Against Certificate",
+    "description" : "Select this option to verify that agent hostnames must match their TLS client certificates.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "NEED_AGENT_VALIDATION",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Use TLS Authentication of Agents to Server",
+    "description" : "Select this option to enable TLS Authentication of Agents to the Server.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "NT_DOMAIN",
+    "required" : false,
+    "displayName" : "Active Directory Domain",
+    "description" : "This parameter is useful when authenticating against an Active Directory server. This value is appended to all usernames before authenticating against AD. For example, if this parameter is set to \"my.domain.com\", and the user authenticating is \"mike\", then \"mike@my.domain.com\" is passed to AD. If this field is unset, the username remains unaltered before being passed to AD.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "PARCEL_AUTODOWNLOAD_PRODUCTS",
+    "required" : false,
+    "default" : "CDH",
+    "displayName" : "Automatically Downloaded Products",
+    "description" : "If automatic parcel downloading is enabled, the list of products that will be downloaded.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "PARCEL_CLEANUP_AUTOMATICALLY",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Automatically Remove Old Parcels",
+    "description" : "Whether parcels for old versions of an activated product should be removed from a cluster when they are no longer in use.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "PARCEL_CLEANUP_THRESHOLD",
+    "required" : false,
+    "default" : "3",
+    "displayName" : "Number of Old Parcel Versions to Retain",
+    "description" : "If automatic removal of old parcels is enabled, the number of old parcels to keep. Any old parcels beyond this value will any be removed. If this is set to zero, no old parcels will be retained.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "PARCEL_DISTRIBUTE_RATE_LIMIT_KBS_PER_SECOND",
+    "required" : false,
+    "default" : "51200",
+    "displayName" : "Parcel Distribution Rate Limit",
+    "description" : "Per-second rate limit for parcel distribution.  The default of 50MiB/second allows for parcel distribution to saturate about half of a Gigabit link.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "PARCEL_MAX_UPLOAD",
+    "required" : false,
+    "default" : "10",
+    "displayName" : "Maximum Parcel Uploads",
+    "description" : "Maximum number of concurrent uploads allowed to distribute parcels to individual hosts. The maximum allowed number of concurrent uploads is 50.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "PARCEL_PROXY_PASSWORD",
+    "required" : false,
+    "displayName" : "Proxy Password",
+    "description" : "The basic authentication password for the proxy.",
+    "relatedName" : "",
+    "sensitive" : true,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "PARCEL_PROXY_PORT",
+    "required" : false,
+    "displayName" : "Proxy Port",
+    "description" : "The port for the proxy server to be used when the Cloudera Manager Server accesses the Internet, such as when downloading parcels and uploading diagnostic data.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "PARCEL_PROXY_PROTOCOL",
+    "required" : false,
+    "default" : "HTTP",
+    "displayName" : "Proxy Protocol",
+    "description" : "The protocol to use for the proxy server when the Cloudera Manager Server accesses the Internet, such as when downloading parcels and uploading diagnostic data.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "PARCEL_PROXY_SERVER",
+    "required" : false,
+    "displayName" : "Proxy Server",
+    "description" : "The proxy server to be used when the Cloudera Manager Server accesses the Internet, such as when downloading parcels and uploading diagnostic data.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "PARCEL_PROXY_USER",
+    "required" : false,
+    "displayName" : "Proxy User",
+    "description" : "The basic authentication user name for the proxy.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "PARCEL_RELATION_VALIDATION",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Validate Parcel Relations",
+    "description" : "Enforce that parcel dependencies are satisfied and conflicts are prevented when activating parcels. Parcel relations (Depends, Conflicts, and Replaces) can be defined the manifests of parcel repositories. Cloudera Manager can also enforce some default relations if none are defined in the manifest.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "PARCEL_REPO_PATH",
+    "required" : false,
+    "default" : "/opt/cloudera/parcel-repo",
+    "displayName" : "Local Parcel Repository Path",
+    "description" : "Path to the local package parcel repository from which binaries are served to the Agents.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "PARCEL_SYMLINKS",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Create System-Wide Symlinks for Active Parcels",
+    "description" : "Whether system-wide symlinks should be created for the active parcels (for example, /usr/bin/hadoop).",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "PARCEL_UPDATE_FREQ",
+    "required" : false,
+    "default" : "60",
+    "displayName" : "Parcel Update Frequency",
+    "description" : "How often to check local and remote parcel repositories for new parcels and if any old parcels should be cleaned up.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "PARCEL_USERS_GROUPS_PERMISSIONS",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Create Users and Groups, and Apply File Permissions for Parcels",
+    "description" : "Whether a parcel's specified users, groups and file permissions should be applied. This may not be desired if custom users and groups are being used, or if they have to be created externally (eg: in LDAP)",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "PHONE_HOME",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Send Diagnostic Data to Cloudera Automatically",
+    "description" : "Allows the Server to automatically send diagnostic data when a collection is triggered.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "REFERER_CHECK",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "HTTP Referer Check",
+    "description" : "Whether to verify \"Referer\" in HTTP header for state changing requests. This protects against cross-site request forgery, but may need to be turned off if browsers or proxies in your environment do not specify the header.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "REMOTE_PARCEL_REPO_URLS",
+    "value" : "https://archive.cloudera.com/cdh5/parcels/{latest_supported}/,https://archive.cloudera.com/cdh4/parcels/latest/,https://archive.cloudera.com/impala/parcels/latest/,https://archive.cloudera.com/search/parcels/latest/,https://archive.cloudera.com/accumulo/parcels/1.4/,https://archive.cloudera.com/accumulo-c5/parcels/latest/,https://archive.cloudera.com/kafka/parcels/latest/,http://archive.cloudera.com/kudu/parcels/latest/,https://cloudera.com/downloads/,https://archive.cloudera.com/spark/parcels/latest/,https://archive.cloudera.com/sqoop-connectors/parcels/latest/",
+    "required" : false,
+    "default" : "https://archive.cloudera.com/cdh5/parcels/{latest_supported}/,https://archive.cloudera.com/cdh4/parcels/latest/,https://archive.cloudera.com/impala/parcels/latest/,https://archive.cloudera.com/search/parcels/latest/",
+    "displayName" : "Remote Parcel Repository URLs",
+    "description" : "URLs of the remote parcel repositories where Cloudera Manager checks for new parcels. When checking for new parcels, Cloudera Manager sends the ID of the server and the server version to the repository host. The special variable {latest_supported} is replaced with the latest version of CDH that Cloudera Manager supports when checks are made.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "REPORT_CONFIGURATIONS",
+    "required" : false,
+    "default" : "[\n  {\n    \"name\": \"Default\",\n    \"tenantType\": \"POOL\",\n    \"daysOfWeek\": [],\n    \"isAllDay\": true,\n    \"startHourOfDay\": 0,\n    \"endHourOfDay\": 0\n  },\n  {\n    \"name\": \"Weekdays\",\n    \"tenantType\": \"POOL\",\n    \"daysOfWeek\": [1, 2, 3, 4, 5],\n    \"isAllDay\": true,\n    \"startHourOfDay\": 0,\n    \"endHourOfDay\": 0\n  }\n]\n",
+    "displayName" : "Report Configurations",
+    "description" : "List of configurations for the Cluster Utilization Report.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "RETAIN_PARCELS_IN_CACHE",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Retain Downloaded Parcel Files",
+    "description" : "Whether downloaded parcel files be kept by Agents after they have been unpacked. Keeping the parcel files consumes additional disk space but allows downloads to be avoided if the parcel ever needs to be unpacked again.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SAML_ENTITY_ALIAS",
+    "required" : false,
+    "default" : "clouderaManager",
+    "displayName" : "SAML Entity Alias",
+    "description" : "Unique alias used to identify the selected instance of local service provider based on used URL.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "SAML_ENTITY_BASE_URL",
+    "required" : false,
+    "displayName" : "SAML Entity Base URL",
+    "description" : "The Base URL used to construct redirect URLs reported in this server's SP metadata. Leave this blank to let the server calculate the base URL itself.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "SAML_ENTITY_ID",
+    "required" : false,
+    "default" : "clouderaManager",
+    "displayName" : "SAML Entity ID",
+    "description" : "The ID that Cloudera Manager will use to identify itself to the IDP. This value should be unique to this Cloudera Manager installation.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "SAML_KEY_ALIAS",
+    "required" : false,
+    "default" : "",
+    "displayName" : "Alias of SAML Sign/Encrypt Private Key",
+    "description" : "The alias used to identify the sign/encrypt private key in the SAML keystore.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "SAML_KEY_PASSWORD",
+    "required" : false,
+    "default" : "",
+    "displayName" : "SAML Sign/Encrypt Private Key Password",
+    "description" : "The password for the sign/encrypt private key in the SAML keystore.",
+    "relatedName" : "",
+    "sensitive" : true,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "SAML_KEYSTORE_PASSWORD",
+    "required" : false,
+    "default" : "",
+    "displayName" : "SAML Keystore Password",
+    "description" : "The password for the SAML keystore.",
+    "relatedName" : "",
+    "sensitive" : true,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "SAML_KEYSTORE_PATH",
+    "required" : false,
+    "displayName" : "Path to SAML Keystore File",
+    "description" : "The filesystem path to the keystore file containing the SP private key and any necessary public certificates to validate the IDP.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "SAML_LOGIN_URL",
+    "required" : false,
+    "displayName" : "SAML Login URL",
+    "description" : "If your IDP does not support SP-initiated SSO (very uncommon), you use a separate login URL, outside of Cloudera Manager. Provide that URL here so that Cloudera Manager can use it when a user needs to log in.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "SAML_METADATA_PATH",
+    "required" : false,
+    "displayName" : "Path to SAML IDP Metadata File",
+    "description" : "The filesystem path to the IDP metadata XML file.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "SAML_OID_ROLE",
+    "required" : false,
+    "default" : "urn:oid:2.5.4.11",
+    "displayName" : "SAML Attribute Identifier for User Role",
+    "description" : "The URN OID that will identify the user's role in the SAML attributes. Only has an effect when 'Attribute' based role assignment is used.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "SAML_OID_USER",
+    "required" : false,
+    "default" : "urn:oid:0.9.2342.19200300.100.1.1",
+    "displayName" : "SAML Attribute Identifier for User ID",
+    "description" : "The URN OID that will identify the user's ID in the SAML attributes.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "SAML_RESPONSE_BINDING",
+    "required" : false,
+    "default" : "ARTIFACT",
+    "displayName" : "SAML Response Binding",
+    "description" : "The SAML Binding format that the IDP is asked to use when sending authentication responses.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SAML_ROLE_MAP",
+    "required" : false,
+    "default" : "admin,user,limited,operator,configurator,clusterAdmin,bdrAdmin,navAdmin,userAdmin,auditor,keyAdmin",
+    "displayName" : "SAML Attribute Values for Roles",
+    "description" : "The values that will appear in the SAML role attribute for each Cloudera Manager role. The first value corresponds to the Full Administrator role. The second value corresponds to the Read-Only role. The third value corresponds to the Limited Operator role. The fourth value corresponds to the Operator role. The fifth value corresponds to the Configurator role. The sixth value corresponds to the Cluster Administrator. The seventh value corresponds to the BDR Administrator. The eighth value corresponds to the Navigator Administrator. The ninth value corresponds to the User Administrator. The tenth value corresponds to the Auditor. The eleventh value corresponds to the Key Administrator.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "SAML_ROLE_MAPPER",
+    "required" : false,
+    "default" : "ATTRIBUTE",
+    "displayName" : "SAML Role Assignment Mechanism",
+    "description" : "The mechanism to use for assigning roles to users. 'Attribute' assigns roles based on a SAML attribute. 'Script' assigns roles based on the result of an external script.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SAML_ROLE_SCRIPT",
+    "required" : false,
+    "displayName" : "Path to SAML Role Assignment Script",
+    "description" : "An external script (or binary) to use to assign roles to SAML users. The username is passed as the first command-line argument. Program exit code should be: 0 for Full Administrator, 1 for Read-Only, 2 for Limited Operator, 3 for Operator, 4 for Configurator, 5 for Cluster Administrator, 6 for BDR Administrator, 7 for Navigator Administrator, 8 for User Administrator, 9 for Auditor, 10 for Key Administrator, and a negative value for failure.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "SAML_USER_SOURCE",
+    "required" : false,
+    "default" : "ATTRIBUTE",
+    "displayName" : "Source of User ID in SAML Response",
+    "description" : "Whether the user ID should be obtained from the SAML response's NameID field or from an attribute",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_AD_ACCOUNT_PREFIX",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Active Directory Account Prefix",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Active Directory Account Prefix parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_AD_KDC_DOMAIN",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Active Directory Suffix",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Active Directory Suffix parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_AGGREGATOR_METRICS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Multi Cloudera Manager Dashboard Metrics",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Multi Cloudera Manager Dashboard Metrics parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_AUTH_SCRIPT",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: External Authentication Program Path",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the External Authentication Program Path parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_BDR_REPLICATION_KERBEROS_KEYTAB_LOCATION",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Custom Kerberos Keytab Location (to be used for replication for secure clusters on this Cloudera Manager)",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Custom Kerberos Keytab Location (to be used for replication for secure clusters on this Cloudera Manager) parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_BDR_REPLICATION_KERBEROS_PRINCIPAL_NAME",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Custom Kerberos Principal Name (to be used for replication for secure clusters on this Cloudera Manager)",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Custom Kerberos Principal Name (to be used for replication for secure clusters on this Cloudera Manager) parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_CLUSTER_STATS_PATH",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Diagnostic Data Bundle Directory",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Diagnostic Data Bundle Directory parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_CLUSTER_STATS_TMP_PATH",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Diagnostic Data Temp Directory",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Diagnostic Data Temp Directory parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_CM_HOST_NAME",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Cloudera Manager Hostname Override",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Cloudera Manager Hostname Override parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_COMMAND_STORAGE_PATH",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Cloudera Manager Server Local Data Storage Directory",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Cloudera Manager Server Local Data Storage Directory parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_CROSS_ENTITY_AGGREGATE_FILTERS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Cross Entity Aggregate Generation Filters",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Cross Entity Aggregate Generation Filters parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_CSD_REPO_PATH",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Local Descriptor Repository Path",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Local Descriptor Repository Path parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_CUSTOM_BANNER_HTML",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Custom Banner Text",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Custom Banner Text parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_CUSTOM_IA_POLICY",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Custom Information Assurance Policy Text",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Custom Information Assurance Policy Text parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_DIAG_BUNDLE_REDACTION_POLICY",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Redaction Parameters for Diagnostic Bundles",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Redaction Parameters for Diagnostic Bundles parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_GEN_KEYTAB_SCRIPT",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Custom Kerberos Keytab Retrieval Script",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Custom Kerberos Keytab Retrieval Script parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_HEARTBEAT_LOGGING_DIR",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Agent Heartbeat Logging Directory",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Agent Heartbeat Logging Directory parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_KDC_ACCOUNT_CREATION_HOST_OVERRIDE",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Active Directory Domain Controller Override",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Active Directory Domain Controller Override parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_KDC_ADMIN_HOST",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: KDC Admin Server Host",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the KDC Admin Server Host parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_KDC_HOST",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: KDC Server Host",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the KDC Server Host parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_KEYSTORE_PASSWORD",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Cloudera Manager TLS/SSL Server JKS Keystore File Password",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Cloudera Manager TLS/SSL Server JKS Keystore File Password parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_KEYSTORE_PATH",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Cloudera Manager TLS/SSL Server JKS Keystore File Location",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Cloudera Manager TLS/SSL Server JKS Keystore File Location parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_KRB_DOMAIN",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Domain Name(s)",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Domain Name(s) parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_KRB_DOMAIN_REALM",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Configuration Validator: Validator for Advanced Configuration Snippet (Safety Valve) for remaining krb5.conf",
+    "description" : "Whether to suppress configuration warnings produced by the Validator for Advanced Configuration Snippet (Safety Valve) for remaining krb5.conf configuration validator.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_KRB_ENC_TYPES",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Kerberos Encryption Types",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Kerberos Encryption Types parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_KRB_KDC_TIMEOUT",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: KDC Timeout",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the KDC Timeout parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_KRB_LIBDEFAULTS_SAFETY_VALVE",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Advanced Configuration Snippet (Safety Valve) for [libdefaults] section of krb5.conf",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Advanced Configuration Snippet (Safety Valve) for [libdefaults] section of krb5.conf parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_KRB_OTHER_SAFETY_VALVE",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Advanced Configuration Snippet (Safety Valve) for remaining krb5.conf",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Advanced Configuration Snippet (Safety Valve) for remaining krb5.conf parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_KRB_REALMS_SAFETY_VALVE",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Advanced Configuration Snippet (Safety Valve) for the Default Realm in krb5.conf",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Advanced Configuration Snippet (Safety Valve) for the Default Realm in krb5.conf parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_KRB_RENEW_LIFETIME",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Kerberos Renewable Lifetime",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Kerberos Renewable Lifetime parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_KRB_TICKET_LIFETIME",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Kerberos Ticket Lifetime",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Kerberos Ticket Lifetime parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_ADMIN_GROUPS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP Full Administrator Groups",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP Full Administrator Groups parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_AUDITOR_GROUPS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP Auditor Groups",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP Auditor Groups parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_BDR_ADMIN_GROUPS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP BDR Administrator Groups",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP BDR Administrator Groups parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_BIND_DN",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP Bind User Distinguished Name",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP Bind User Distinguished Name parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_BIND_PW",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP Bind Password",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP Bind Password parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_CLUSTER_ADMIN_GROUPS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP Cluster Administrator Groups",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP Cluster Administrator Groups parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_CONFIGURATOR_GROUPS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP Configurator Groups",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP Configurator Groups parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_DN_PATTERN",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP Distinguished Name Pattern",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP Distinguished Name Pattern parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_GROUP_SEARCH_BASE",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP Group Search Base",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP Group Search Base parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_GROUP_SEARCH_FILTER",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP Group Search Filter",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP Group Search Filter parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_KEY_ADMIN_GROUPS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP Key Administrator Groups",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP Key Administrator Groups parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_LIMITED_GROUPS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP Limited Operator Groups",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP Limited Operator Groups parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_NAVIGATOR_ADMIN_GROUPS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP Navigator Administrator Groups",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP Navigator Administrator Groups parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_OPERATOR_GROUPS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP Operator Groups",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP Operator Groups parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_URL",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP URL",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP URL parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_USER_ADMIN_GROUPS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP User Administrator Groups",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP User Administrator Groups parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_USER_GROUPS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP User Groups",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP User Groups parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_USER_SEARCH_BASE",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP User Search Base",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP User Search Base parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_LDAP_USER_SEARCH_FILTER",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: LDAP User Search Filter",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the LDAP User Search Filter parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_MIXED_PACKAGES_AND_PARCELS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Configuration Validator: Mixed Packages And Parcels",
+    "description" : "Whether to suppress configuration warnings produced by the Mixed Packages And Parcels configuration validator.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_NT_DOMAIN",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Active Directory Domain",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Active Directory Domain parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_PARCEL_AUTODOWNLOAD_PRODUCTS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Automatically Downloaded Products",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Automatically Downloaded Products parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_PARCEL_PROXY_PASSWORD",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Proxy Password",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Proxy Password parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_PARCEL_PROXY_SERVER",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Proxy Server",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Proxy Server parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_PARCEL_PROXY_USER",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Proxy User",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Proxy User parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_PARCEL_REPO_PATH",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Local Parcel Repository Path",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Local Parcel Repository Path parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_REMOTE_PARCEL_REPO_URLS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Remote Parcel Repository URLs",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Remote Parcel Repository URLs parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_REPORT_CONFIGURATIONS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Report Configurations",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Report Configurations parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SAML_ENTITY_ALIAS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: SAML Entity Alias",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the SAML Entity Alias parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SAML_ENTITY_BASE_URL",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: SAML Entity Base URL",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the SAML Entity Base URL parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SAML_ENTITY_ID",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: SAML Entity ID",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the SAML Entity ID parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SAML_KEY_ALIAS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Alias of SAML Sign/Encrypt Private Key",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Alias of SAML Sign/Encrypt Private Key parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SAML_KEY_PASSWORD",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: SAML Sign/Encrypt Private Key Password",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the SAML Sign/Encrypt Private Key Password parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SAML_KEYSTORE_PASSWORD",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: SAML Keystore Password",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the SAML Keystore Password parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SAML_KEYSTORE_PATH",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Path to SAML Keystore File",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Path to SAML Keystore File parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SAML_LOGIN_URL",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: SAML Login URL",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the SAML Login URL parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SAML_METADATA_PATH",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Path to SAML IDP Metadata File",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Path to SAML IDP Metadata File parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SAML_OID_ROLE",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: SAML Attribute Identifier for User Role",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the SAML Attribute Identifier for User Role parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SAML_OID_USER",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: SAML Attribute Identifier for User ID",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the SAML Attribute Identifier for User ID parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SAML_ROLE_MAP",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: SAML Attribute Values for Roles",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the SAML Attribute Values for Roles parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SAML_ROLE_SCRIPT",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Path to SAML Role Assignment Script",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Path to SAML Role Assignment Script parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SCM_SERVER_RESTART",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Configuration Validator: Cloudera Manager Server Restart",
+    "description" : "Whether to suppress configuration warnings produced by the Cloudera Manager Server Restart configuration validator.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SECURITY_REALM",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Kerberos Security Realm",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Kerberos Security Realm parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SINGLE_USER_GROUP",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Single User Mode Group",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Single User Mode Group parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SINGLE_USER_NAME",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Single User Mode User",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Single User Mode User parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SSL_CERTIFICATE_HOSTNAME",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Server SSL Certificate Host Name.",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Server SSL Certificate Host Name. parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_SYSTEM_IDENTIFIER",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: System Identifier",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the System Identifier parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_TLS_WITH_KERBEROS_VALIDATOR",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Configuration Validator: TLS With Kerberos Validator",
+    "description" : "Whether to suppress configuration warnings produced by the TLS With Kerberos Validator configuration validator.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_TRUSTED_REALMS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Kerberos Trusted Realms",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Kerberos Trusted Realms parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_TRUSTSTORE_PASSWORD",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Cloudera Manager TLS/SSL Certificate Trust Store Password",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Cloudera Manager TLS/SSL Certificate Trust Store Password parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SCM_CONFIG_SUPPRESSION_TRUSTSTORE_PATH",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Suppress Parameter Validation: Cloudera Manager TLS/SSL Certificate Trust Store File",
+    "description" : "Whether to suppress configuration warnings produced by the built-in parameter validation for the Cloudera Manager TLS/SSL Certificate Trust Store File parameter.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SECURITY_REALM",
+    "required" : false,
+    "default" : "HADOOP.COM",
+    "displayName" : "Kerberos Security Realm",
+    "description" : "The realm to use for Kerberos security. <strong>Note:</strong> Changing this setting would clear up all existing credentials and keytabs from Cloudera Manager.",
+    "relatedName" : "default_realm",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "SESSION_LIMIT_CONCURRENCY",
+    "required" : false,
+    "default" : "0",
+    "displayName" : "Maximum Number of Active User Sessions",
+    "description" : "Restrict users to a certain number of active sessions at a time. If set, a user is limited to the specified number of sessions, and the oldest session is terminiated if the user logs in somewhere else. If not set, users can be logged in from as many places as they choose. If the user has 'Remember Me' turned on, or SAML is used for authentication, the user is automatically logged back in each time the session is ended. '0' means no limit is applied.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SESSION_REMEMBER_ME",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Allow 'Remember Me' Option",
+    "description" : "Whether to allow a user to select 'Remember Me' when logging in. If this is set, the user will not need to log in again for two weeks (unless the server is restarted during that time). If the user chooses 'Remember Me', then the session timeout is ignored.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SESSION_TIMEOUT",
+    "required" : false,
+    "default" : "1800",
+    "displayName" : "Session Timeout",
+    "description" : "The length of time a user's session can be idle for before the user must log in again. Note that currently logged in users will continue with their old timeout values.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SHOW_STACKTRACES",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Show Stacktraces On Error Pages",
+    "description" : "Control whether stacktraces are shown on error pages. While stacktraces help with debugging, they can sometimes expose sensitive information to a potentially malicious user.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SINGLE_USER_ENABLED",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Single User Mode",
+    "description" : "Configure all clusters to run in single user mode where the Cloudera Manager agent and all service processes run as the same system user. Only supported for CDH 5.2 and higher.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "SINGLE_USER_GROUP",
+    "required" : false,
+    "default" : "cloudera-scm",
+    "displayName" : "Single User Mode Group",
+    "description" : "System group to use for agent and service processes in single user mode.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "SINGLE_USER_NAME",
+    "required" : false,
+    "default" : "cloudera-scm",
+    "displayName" : "Single User Mode User",
+    "description" : "System user to use for agent and service processes in single user mode.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "SSL_CERTIFICATE_HOSTNAME",
+    "required" : false,
+    "displayName" : "Server SSL Certificate Host Name.",
+    "description" : "Host name associated with CM Server SSL certificate to be passed to configuration of newly added host as the host agents are to connect to.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "SYSTEM_IDENTIFIER",
+    "required" : false,
+    "default" : "default",
+    "displayName" : "System Identifier",
+    "description" : "An identifier for this system, to be included with diagnostic data bundles.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "TRUSTED_REALMS",
+    "required" : false,
+    "displayName" : "Kerberos Trusted Realms",
+    "description" : "List of Kerberos realms that all services on this Cloudera Manager should trust. This parameter is used to configure and verify krb5.conf file. The parameter is auto-configured while adding a peer, but it is recommended that users ensure the values are correct.",
+    "relatedName" : "trusted_realms",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "TRUSTSTORE_PASSWORD",
+    "required" : false,
+    "displayName" : "Cloudera Manager TLS/SSL Certificate Trust Store Password",
+    "description" : "The password for the Cloudera Manager TLS/SSL Certificate Trust Store File. This password is not required to access the trust store; this field can be left blank. This password provides optional integrity checking of the file. The contents of trust stores are certificates, and certificates are public information.",
+    "relatedName" : "",
+    "sensitive" : true,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "TRUSTSTORE_PATH",
+    "required" : false,
+    "displayName" : "Cloudera Manager TLS/SSL Certificate Trust Store File",
+    "description" : "The location on disk of the trust store, in .jks format, used to confirm the authenticity of TLS/SSL servers that Cloudera Manager might connect to. This is used when Cloudera Manager is the client in a TLS/SSL connection. This trust store must contain the certificate(s) used to sign the service(s) connected to. If this parameter is not provided, the default list of well-known certificate authorities is used instead.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK",
+    "validationWarningsSuppressed" : false
+  }, {
+    "name" : "TSQUERY_HEATMAP_STREAMS_LIMIT",
+    "required" : false,
+    "default" : "10000",
+    "displayName" : "Maximum Number of Time-Series Streams Returned Per Heatmap",
+    "description" : "The maximum number of time-series streams returned by a single time-series heatmap query. The default is 10,000 streams. This value can be set higher, but increasing it may negatively impact chart performance and may require more resources be given to the Cloudera Manager Server, Host Monitor, and Service Monitor.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "TSQUERY_SCATTER_STREAMS_LIMIT",
+    "required" : false,
+    "default" : "1000",
+    "displayName" : "Maximum Number of Time-Series Streams Returned Per Scatter Plot",
+    "description" : "The maximum number of time-series streams returned by a single time-series scatter plot. The default is 1000 streams. This value can be set higher, but increasing it may negatively impact chart performance and may require more resources be given to the Cloudera Manager Server, Host Monitor, and Service Monitor.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "TSQUERY_STREAMS_LIMIT",
+    "required" : false,
+    "default" : "250",
+    "displayName" : "Maximum Number Of Time-Series Streams Returned Per Line-Based Chart",
+    "description" : "The maximum number of time-series streams that will be returned by a single time-series query. The default is 250 streams. This value can be set higher, but increasing it may negatively impact chart performance and may require more resources be given to the Cloudera Manager Server, Host Monitor, and Service Monitor.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "TSQUERY_TABLE_STREAMS_LIMIT",
+    "required" : false,
+    "default" : "2000",
+    "displayName" : "Maximum Number of Time-Series Streams Returned Per Table",
+    "description" : "The maximum number of time-series streams returned in a single time-series table. The default is 2000 streams. This value can be set higher, but increasing it may negatively impact chart performance and may require more resources be given to the Cloudera Manager Server, Host Monitor, and Service Monitor.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "USING_HELP_FROM_CCP",
+    "required" : false,
+    "default" : "true",
+    "displayName" : "Open latest Help files from the Cloudera website",
+    "description" : "If this option is selected, the Help link opens the latest Help files from the Cloudera web site (requires Internet access from the browser). If not selected, the locally installed Help files, which are not updated after installation, are opened (no Internet access from the browser is required).",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  }, {
+    "name" : "WEB_TLS",
+    "required" : false,
+    "default" : "false",
+    "displayName" : "Use TLS Encryption for Admin Console",
+    "description" : "Enable TLS encryption (HTTPS) between the user and the Cloudera Manager Admin Console. When checked, the HTTPS port will be used.",
+    "relatedName" : "",
+    "sensitive" : false,
+    "validationState" : "OK"
+  } ]
+}
