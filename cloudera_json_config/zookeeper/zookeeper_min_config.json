@@ -1,0 +1,7 @@
+{
+  "items" : [ {
+    "name" : "zookeeper_datadir_autocreate",
+    "value" : "true",
+    "sensitive" : false
+  } ]
+}
