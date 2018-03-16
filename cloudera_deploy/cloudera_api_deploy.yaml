@@ -1,0 +1,128 @@
+# Cloudera Manager config
+
+cloudera_manager:
+
+  authentication:
+    host: 192.168.139.33
+    port: 7180
+    username: admin
+    password: admin
+    tls: false
+    api-version: 13
+
+  cm_advance_config:
+    tsquery_streams_limit: 1000
+    remote_parcel_repo_urls: http://archive.cloudera.com/cdh5/parcels/5.12.2,
+      http://archive.cloudera.com/accumulo/parcels/1.4/,
+      http://archive.cloudera.com/accumulo-c5/parcels/latest/,
+      http://archive.cloudera.com/kafka/parcels/latest/,
+      http://archive.cloudera.com/navigator-keytrustee5/parcels/latest/,
+      http://archive.cloudera.com/spark/parcels/latest/,
+      http://archive.cloudera.com/sqoop-connectors/parcels/latest/
+
+  mgmt_services:
+    MGMT:
+      roles:
+        - group: ACTIVITYMONITOR
+          hosts:
+            - cloudera-cluster-cloudera-manager.vagrantup.com
+          config:
+            firehose_database_host: cloudera-cluster-cloudera-manager.vagrantup.com:3306
+            firehose_database_user: amon
+            firehose_database_password: TG7Fc4WbHhXMXd9b
+            firehose_database_type: mysql
+            firehose_database_name: amon
+        - group: ALERTPUBLISHER
+          hosts:
+            - cloudera-cluster-cloudera-manager.vagrantup.com
+        - group: EVENTSERVER
+          hosts:
+            - cloudera-cluster-cloudera-manager.vagrantup.com
+        - group: HOSTMONITOR
+          hosts:
+            - cloudera-cluster-cloudera-manager.vagrantup.com
+        - group: SERVICEMONITOR
+          hosts:
+            - cloudera-cluster-cloudera-manager.vagrantup.com
+        - group: REPORTSMANAGER
+          hosts:
+            - cloudera-cluster-cloudera-manager.vagrantup.com
+          config:
+            headlamp_database_host: cloudera-cluster-cloudera-manager.vagrantup.com:3306
+            headlamp_database_user: rman
+            headlamp_database_password: dBteu3xUduKzx4u2
+            headlamp_database_type: mysql
+            headlamp_database_name: rman
+
+host_installation:
+  authentication:
+    host_username: cmadmin
+    host_private_key: "-----BEGIN RSA PRIVATE KEY-----\nMIIEogIBAAKCAQEAqfrxCPE1adUIy3m+QLNHfYJ+2CxMQNkzuyj6FlrmuKEOmZ1u\ngLURHUhwnQJ9yvSZVthmTF8foKQ4ffrIM/UU81RUHshJrpIqHyYO9tIDV4cCP4gH\nsdHS77nqUlLuPn4Ca7nBxqqQHyojIIGKvW5yfrjSULtSLEurdLrX9Yql8CYLO/R2\nRqubmbd8KsWOoxynWIaYnROH2oU8AAAqXSBe/5L7xt18zCGluBU3cVwWIlfEwRRh\nZB0PfOBHVs74zFPZTWJQwW4rSfucY61zy414e6kfFMdNoMG7tSv+jqX9avtCA66B\nuy9KerqvUdqYjSkuTvH0jqTbw7eaEBD6reivfwIBIwKCAQBcRmWXI9sq0ruhqH05\nEN2qiKtCJq0NQrWuvnkiFBbZQXz0TiYLWvqpfxiPv4Ydt/t4SZaefMgGv4xhpWVe\nCLOaCTT6xH/FKsZorkKjPs6dOqly8hLOPrRWQFqht/2s5VHFc3fSP1WNQsKcnhgd\nsPxTa6VfBppSj3pVT3yMm7kql2w83UK6cRBtUuIm8CaeGt8P2BWiBrJ1q8nTlFaV\nNhriq5+/p3Ogpm9kLE1TTVeTiHXeV4o16d6IWtutQ1R8EAYKSQCkCtEVNmmEZtjj\nik8ZOoaNbdwwJItQAvrEGAOH+SWe2nicGYE8k0x86mICB+WA8yoDS+F2ws1D+8T8\nwxg7AoGBAN89ysz4H3mzBGYiNP9S9Kwp/+/t/g5dwpPjzH9ZTh+9FOBGkbSOlfsE\nwe1EGuHHXHI83NuMGE1WXxxZSthrtozmt4qxHhRuJYZYKTWa35nFOewT7ipLkmEU\n/4Ea4Ssp06Mv24zg0vXlzXPxFBMukuS0kZR/5qnonR49kPy6lT+HAoGBAMLsXC5i\n5EcCXcZHks7pirEe0C/94Ld7k62Wc0FqOK9rDBAsuQC3S5ojN5NQb10iyg2ZzCjt\n96F8KqPL0jPn3hjadSMy+MuZ0CtACifr14LmRsHhX5syZUyGDA3Upg8eQbfXntNP\nBO1ASa56qvk/5g6fXRKqWtXlYsvOh8j5Sl5JAoGBANjc8ORev32JVLr8qIMAIOHC\nZlbJ73uridF+NF50Ar++/lY17KDFBrlVFChQyaggwDR1o1jufgH8IeEGSLT669lV\nJ1OHfE5cXveI15Mou/R2csgTXGOZ3qdze9yAgva66tkJ6zhlXzgDzuWoXKTrah//\n3eC2wtDwmKEIm3kqR9dPAoGAadDEU7IG5LgkRxDpS8Cbvzyc5tpGygFBih55FOHk\nQfhIYI1OfLtGTFxCva9SZcJtr5yiB5cgBzTGsLB5bKJxQLEbBHrBkxj7+ji1Dlt0\n/eq4smRnGbxFnpHpSVYuQrinVSvogVbIKQWkV2cpnT/x6q5Id9jSOZnH6vsWgwr8\nfFMCgYEA1lgKHVvKVgKRGjIzM/0kgsDonBLL59lBPBj+qeGbO9Dz1IkZw0Qn2VOK\nWGDStild9sOZsEynM9FJ4cy8kPTYVPngxmIyYOdWWJmlbKgAa4jmIKnLwyUtGq1X\nspsNRNAJVr2zexPxf1Bbg0LuIRziUQO/bFbHTQQZ21E4JsQAwbA=\n-----END RSA PRIVATE KEY-----"
+    host_ssh_port: 22
+    host_cm_repo_url: http://archive.cloudera.com/cm5/redhat/6/x86_64/cm/5/
+    host_cm_repo_gpg_key_custom_url: http://archive.cloudera.com/cm5/redhat/6/x86_64/cm/RPM-GPG-KEY-cloudera
+    host_java_install_strategy: AUTO
+    host_unlimited_jce_policy: true
+    host_parallel_install_count: 10
+
+
+clusters:
+  # Basic cluster information
+  - cluster: BaseHadoopCluster
+    version: CDH5
+    fullVersion: 5.12.2
+    hosts: ["cloudera-cluster-cloudera-manager.vagrantup.com"]
+
+
+    # Parcels
+    parcels:
+      - repo_cdh:
+        product: CDH
+        version: 5.12.2-1.cdh5.12.2.p0.4
+      - repo_kafka:
+        product: KAFKA
+        version: 5.12.2-1.cdh5.12.2.p0.4
+
+
+    # Service. All the service definitions go here
+    services:
+      ZOOKEEPER:
+        config:
+          zookeeper_datadir_autocreate: true
+        roles:
+          - group: SERVER
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+            config:
+              quorumPort: 2888
+              electionPort: 3888
+              dataLogDir: /var/lib/zookeeper
+              dataDir: /var/lib/zookeeper
+
+  - cluster: ZookeeperCluster
+    version: CDH5
+    fullVersion: 5.12.2
+    hosts: ["cloudera-cluster-zookeeper.vagrantup.com"]
+
+
+    # Parcels
+    parcels:
+      - repo_cdh:
+        product: CDH
+        version: 5.12.2-1.cdh5.12.2.p0.4
+
+
+    # Service. All the service definitions go here
+    services:
+      ZOOKEEPER:
+        config:
+          zookeeper_datadir_autocreate: true
+        roles:
+          - group: SERVER
+            hosts:
+              - cloudera-cluster-zookeeper.vagrantup.com
+            config:
+              quorumPort: 2888
+              electionPort: 3888
+              dataLogDir: /var/lib/zookeeper
+              dataDir: /var/lib/zookeeper
