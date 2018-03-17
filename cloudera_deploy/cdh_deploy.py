@@ -13,7 +13,7 @@ class ClouderaManagerSetup():
 
 
     def __init__(self, config, trial_version=False, license_information=None):
-        self.config = config
+        self.config = config['cloudera_manager']
         self.trial = trial_version
         self.license_information = license_information
         self.cluster = None
@@ -23,12 +23,12 @@ class ClouderaManagerSetup():
     @property
     def api_resource(self):
         if self._api_resource is None:
-            self._api_resource = ApiResource(self.config['cm']['host'],
-                                             self.config['cm']['port'],
-                                             self.config['cm']['username'],
-                                             self.config['cm']['password'],
-                                             self.config['cm']['tls'],
-                                 version=self.config['cm']['api-version'])
+            self._api_resource = ApiResource(self.config['authentication']['host'],
+                                             self.config['authentication']['port'],
+                                             self.config['authentication']['username'],
+                                             self.config['authentication']['password'],
+                                             self.config['authentication']['tls'],
+                                 version=self.config['authentication']['api-version'])
 
         return self._api_resource
 
@@ -55,15 +55,15 @@ class ClouderaManagerSetup():
             https://cloudera.github.io/cm_api/epydoc/5.10.0/cm_api.endpoints.cms.ClouderaManager-class.html#host_install
         """
         logging.info("Installing HOSTs.")
-        cmd = self.cloudera_manager_handle.host_install(self.config['cm_host_installation']['host_username'],
+        cmd = self.cloudera_manager_handle.host_install(self.config['host_installation']['authentication']['host_username'],
                                self.config['cluster']['hosts'],
-                               ssh_port=self.config['cm_host_installation']['host_ssh_port'],
-                               private_key=self.config['cm_host_installation']['host_private_key'],
-                               parallel_install_count=self.config['cm_host_installation']['host_parallel_install_count'],
-                               cm_repo_url=self.config['cm_host_installation']['host_cm_repo_url'],
-                               gpg_key_custom_url=self.config['cm_host_installation']['host_cm_repo_gpg_key_custom_url'],
-                               java_install_strategy=self.config['cm_host_installation']['host_java_install_strategy'],
-                               unlimited_jce=self.config['cm_host_installation']['host_unlimited_jce_policy'])
+                               ssh_port=self.config['host_installation']['authentication']['host_ssh_port'],
+                               private_key=self.config['host_installation']['authentication']['host_private_key'],
+                               parallel_install_count=self.config['host_installation']['authentication']['host_parallel_install_count'],
+                               cm_repo_url=self.config['host_installation']['authentication']['host_cm_repo_url'],
+                               gpg_key_custom_url=self.config['host_installation']['authentication']['host_cm_repo_gpg_key_custom_url'],
+                               java_install_strategy=self.config['host_installation']['authentication']['host_java_install_strategy'],
+                               unlimited_jce=self.config['host_installation']['authentication']['host_unlimited_jce_policy'])
 
         #
         # Check command to complete.
@@ -73,42 +73,6 @@ class ClouderaManagerSetup():
             if (cmd.resultMessage is not None and
                         'There is already a pending command on this entity' in cmd.resultMessage):
                 raise Exception("HOST INSTALLATION FAILED.")
-
-
-
-    def init_cluster(self):
-        try:
-            self.cluster = self.api_resource.get_cluster(self.config['cluster']['name'])
-            return self.cluster
-
-        except ApiException:
-            cluster = self.api_resource.create_cluster(config['cluster']['name'],
-                                                    config['cluster']['version'],
-                                                    config['cluster']['fullVersion'])
-
-
-
-        cluster_hosts = []
-        #
-        # Picking up all the nodes from the yaml configuration.
-        #
-        for host_in_cluster in cluster.list_hosts():
-            cluster_hosts.append(host_in_cluster)
-
-        hosts = []
-
-        #
-        # Create a host list, make sure we dont have duplicates.
-        #
-        for host in config['cluster']['hosts']:
-            if host not in cluster_hosts:
-                hosts.append(host)
-
-        #
-        # Adding all hosts to the cluster.
-        #
-        cluster.add_hosts(hosts)
-        return self.cluster
 
 
     def deploy_cloudera_management_services(self):
@@ -144,7 +108,7 @@ class ClouderaManagerSetup():
         #
         # Now add all services to the if not already present
         #
-        for role in config['services']['MGMT']['roles']:
+        for role in config['mgmt_services']['MGMT']['roles']:
             if not len(mgmt_service.get_roles_by_type(role['group'])) > 0:
                 logging.info("Creating role for {0}".format(role['group']))
                 mgmt_service.create_role('{0}-1'.format(role['group']), role['group'], role['hosts'][0])
@@ -152,7 +116,7 @@ class ClouderaManagerSetup():
         #
         # Update configuration for each service.
         #
-        for role in config['services']['MGMT']['roles']:
+        for role in config['mgmt_services']['MGMT']['roles']:
             role_group = mgmt_service.get_role_config_group('mgmt-{0}-BASE'.format(role['group']))
             logging.info(role_group)
             #
@@ -180,6 +144,48 @@ class ClouderaManagerSetup():
             logging.ERROR("[MGMT] Cloudera Management services didn't start up properly")
 
 
+class Clusters(ClouderaManagerSetup):
+
+
+    def init_cluster(self):
+
+
+        for cluster in config['clusters']:
+            try:
+
+                self.cluster[cluster['cluster']] = self.api_resource.get_cluster(cluster['cluster'])
+                return self.cluster[cluster['cluster']]
+
+            except ApiException:
+                self.cluster[cluster['cluster']] = self.api_resource.create_cluster(cluster['cluster'],
+                                                        cluster['version'],
+                                                        cluster['fullVersion'])
+
+
+
+            cluster_hosts = []
+            #
+            # Picking up all the nodes from the yaml configuration.
+            #
+            for host_in_cluster in cluster.list_hosts():
+                cluster_hosts.append(host_in_cluster)
+
+            hosts = []
+
+            #
+            # Create a host list, make sure we dont have duplicates.
+            #
+            for host in cluster['hosts']:
+                if host not in cluster_hosts:
+                    hosts.append(host)
+
+            #
+            # Adding all hosts to the cluster.
+            #
+            cluster.add_hosts(hosts)
+
+        return self.cluster
+
 
 if __name__ == '__main__':
 
@@ -205,7 +211,10 @@ if __name__ == '__main__':
         with open(file_name, 'r') as cluster_yaml:
             config = yaml.load(cluster_yaml)
 
-        print config
+        print config['cloudera_manager']
+        print config['host_installation']
+        print config['clusters'][0]
+        print config['clusters'][1]
 
     except IOError as e:
         logging.error("ERROR {0}. EXIT NOW :( !!!!".format(e))
