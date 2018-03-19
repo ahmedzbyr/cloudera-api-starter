@@ -1,6 +1,6 @@
 # Cloudera Deployment Script.
 
-WORKING IN PROGRESS
+Currently this is still **`WORKING IN PROGRESS`** ...
 
 Wishlist.
 
