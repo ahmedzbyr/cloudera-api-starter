@@ -115,7 +115,7 @@ class ClouderaManagerSetup():
         #
         for role in config['cloudera_manager']['mgmt_services']['MGMT']['roles']:
             if not len(mgmt_service.get_roles_by_type(role['group'])) > 0:
-                logging.info("Creating role for {0}".format(role['group']))
+                logging.info("Creating role for {0} {1}".format(role['group'], role['hosts'][0]))
                 mgmt_service.create_role('{0}-1'.format(role['group']), role['group'], role['hosts'][0])
 
         #
@@ -222,7 +222,7 @@ if __name__ == '__main__':
 
         cloudera_manager_setup = ClouderaManagerSetup(config)
         cloudera_manager_setup.enable_trial_license_for_cm()
-        cloudera_manager_setup.host_installation()
+        #cloudera_manager_setup.host_installation()
         cloudera_manager_setup.deploy_cloudera_management_services()
 
 
