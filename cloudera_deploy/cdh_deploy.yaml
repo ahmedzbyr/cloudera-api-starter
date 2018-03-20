@@ -30,7 +30,7 @@ cloudera_manager:
             firehose_database_host: cloudera-cluster-cloudera-manager.vagrantup.com:3306
             firehose_database_user: amon
             firehose_database_password: TG7Fc4WbHhXMXd9b
-            firehose_database_type: mysql
+            firehose_database_type: postgresql
             firehose_database_name: amon
         - group: ALERTPUBLISHER
           hosts:
@@ -51,7 +51,7 @@ cloudera_manager:
             headlamp_database_host: cloudera-cluster-cloudera-manager.vagrantup.com:3306
             headlamp_database_user: rman
             headlamp_database_password: dBteu3xUduKzx4u2
-            headlamp_database_type: mysql
+            headlamp_database_type: postgresql
             headlamp_database_name: rman
 
 host_installation:
@@ -99,30 +99,30 @@ clusters:
               dataLogDir: /var/lib/zookeeper
               dataDir: /var/lib/zookeeper
 
-  - cluster: ZookeeperCluster
-    version: CDH5
-    fullVersion: 5.12.2
-    hosts: ["cloudera-cluster-zookeeper.vagrantup.com"]
-
-
-    # Parcels
-    parcels:
-      - repo_cdh:
-        product: CDH
-        version: 5.12.2-1.cdh5.12.2.p0.4
-
-
-    # Service. All the service definitions go here
-    services:
-      ZOOKEEPER:
-        config:
-          zookeeper_datadir_autocreate: true
-        roles:
-          - group: SERVER
-            hosts:
-              - cloudera-cluster-zookeeper.vagrantup.com
-            config:
-              quorumPort: 2888
-              electionPort: 3888
-              dataLogDir: /var/lib/zookeeper
-              dataDir: /var/lib/zookeeper
+#  - cluster: ZookeeperCluster
+#    version: CDH5
+#    fullVersion: 5.12.2
+#    hosts: ["cloudera-cluster-zookeeper.vagrantup.com"]
+#
+#
+#    # Parcels
+#    parcels:
+#      - repo_cdh:
+#        product: CDH
+#        version: 5.12.2-1.cdh5.12.2.p0.4
+#
+#
+#    # Service. All the service definitions go here
+#    services:
+#      ZOOKEEPER:
+#        config:
+#          zookeeper_datadir_autocreate: true
+#        roles:
+#          - group: SERVER
+#            hosts:
+#              - cloudera-cluster-zookeeper.vagrantup.com
+#            config:
+#              quorumPort: 2888
+#              electionPort: 3888
+#              dataLogDir: /var/lib/zookeeper
+#              dataDir: /var/lib/zookeeper
