@@ -27,7 +27,7 @@ cloudera_manager:
           hosts:
             - cloudera-cluster-cloudera-manager.vagrantup.com
           config:
-            firehose_database_host: cloudera-cluster-cloudera-manager.vagrantup.com:3306
+            firehose_database_host: cloudera-cluster-cloudera-manager.vagrantup.com
             firehose_database_user: amon
             firehose_database_password: TG7Fc4WbHhXMXd9b
             firehose_database_type: postgresql
@@ -48,7 +48,7 @@ cloudera_manager:
           hosts:
             - cloudera-cluster-cloudera-manager.vagrantup.com
           config:
-            headlamp_database_host: cloudera-cluster-cloudera-manager.vagrantup.com:3306
+            headlamp_database_host: cloudera-cluster-cloudera-manager.vagrantup.com
             headlamp_database_user: rman
             headlamp_database_password: dBteu3xUduKzx4u2
             headlamp_database_type: postgresql
