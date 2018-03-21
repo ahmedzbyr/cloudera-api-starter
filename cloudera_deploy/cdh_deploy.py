@@ -14,11 +14,14 @@ class ClouderaManagerSetup():
 
     def __init__(self, config, trial_version=True, license_information=None):
         self.config = config
+        self.cluster = {}
         self.trial = trial_version
         self.license_information = license_information
-        self.cluster = {}
         self._api_resource = None
         self._cloudera_manager_handle = None
+
+    def __getitem__(self, item):
+        return getattr(self, item)
 
     @property
     def api_resource(self):
@@ -149,11 +152,19 @@ class ClouderaManagerSetup():
             logging.ERROR("[MGMT] Cloudera Management services didn't start up properly")
 
 
+    def setup(self):
+        self.enable_trial_license_for_cm()
+        #self.host_installation()
+        self.deploy_cloudera_management_services()
+
+
+
 class Clusters(ClouderaManagerSetup):
 
 
     def init_cluster(self):
 
+        logging.debug(config['clusters'])
 
         for cluster in config['clusters']:
             try:
@@ -167,14 +178,13 @@ class Clusters(ClouderaManagerSetup):
                                                         cluster['fullVersion'])
 
 
+            cluster_hosts = [self.api_resource.get_host(host.hostId).hostname
+                             for host in self.cluster[cluster['cluster']].list_hosts()]
+            logging.INFO('Nodes already in Cluster: ' + str(cluster_hosts))
 
-            cluster_hosts = []
             #
-            # Picking up all the nodes from the yaml configuration.
+            # New hosts to be added to the cluster..
             #
-            for host_in_cluster in cluster[cluster['cluster']].list_hosts():
-                cluster_hosts.append(host_in_cluster)
-
             hosts = []
 
             #
@@ -221,9 +231,7 @@ if __name__ == '__main__':
             print item['hosts']
 
         cloudera_manager_setup = ClouderaManagerSetup(config)
-        cloudera_manager_setup.enable_trial_license_for_cm()
-        #cloudera_manager_setup.host_installation()
-        cloudera_manager_setup.deploy_cloudera_management_services()
+        cloudera_manager_setup.setup()
 
 
     except IOError as e:

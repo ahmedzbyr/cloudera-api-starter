@@ -81,7 +81,7 @@ clusters:
         version: 5.12.2-1.cdh5.12.2.p0.4
       - repo_kafka:
         product: KAFKA
-        version: 5.12.2-1.cdh5.12.2.p0.4
+        version: 3.0.0-1.3.0.0.p0.40
 
 
     # Service. All the service definitions go here
