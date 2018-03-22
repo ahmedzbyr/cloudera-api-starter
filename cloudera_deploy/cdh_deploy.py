@@ -52,6 +52,9 @@ class ClouderaManagerSetup():
             self.cloudera_manager_handle.begin_trial()
 
 
+    def update_adv_cm_config(self):
+        self.cloudera_manager_handle.update_config(self.config['cloudera_manager']['cm_advance_config'])
+
     def host_installation(self):
         """
             Host installation.
@@ -154,6 +157,7 @@ class ClouderaManagerSetup():
 
     def setup(self):
         self.enable_trial_license_for_cm()
+        self.update_adv_cm_config()
         #self.host_installation()
         self.deploy_cloudera_management_services()
 
@@ -170,7 +174,8 @@ class Clusters(ClouderaManagerSetup):
             try:
 
                 self.cluster[cluster['cluster']] = self.api_resource.get_cluster(cluster['cluster'])
-                return self.cluster[cluster['cluster']]
+                logging.debug("Cluster Already Exists:" + str(self.cluster))
+                return self.cluster
 
             except ApiException:
                 self.cluster[cluster['cluster']] = self.api_resource.create_cluster(cluster['cluster'],
@@ -178,9 +183,11 @@ class Clusters(ClouderaManagerSetup):
                                                         cluster['fullVersion'])
 
 
+                logging.debug("Cluster Created:" + str(self.cluster))
+
             cluster_hosts = [self.api_resource.get_host(host.hostId).hostname
                              for host in self.cluster[cluster['cluster']].list_hosts()]
-            logging.INFO('Nodes already in Cluster: ' + str(cluster_hosts))
+            logging.info('Nodes already in Cluster: ' + str(cluster_hosts))
 
             #
             # New hosts to be added to the cluster..
@@ -194,12 +201,17 @@ class Clusters(ClouderaManagerSetup):
                 if host not in cluster_hosts:
                     hosts.append(host)
 
+
+            #
+            logging.info("Adding new nodes:" + str(hosts))
+
             #
             # Adding all hosts to the cluster.
             #
-            cluster[cluster['cluster']].add_hosts(hosts)
+            self.cluster[cluster['cluster']].add_hosts(hosts)
 
         return self.cluster
+
 
 
 if __name__ == '__main__':
@@ -232,6 +244,10 @@ if __name__ == '__main__':
 
         cloudera_manager_setup = ClouderaManagerSetup(config)
         cloudera_manager_setup.setup()
+
+        cluster = Clusters(config)
+        cluster.init_cluster()
+        cluster.update_adv_cm_config()
 
 
     except IOError as e:
