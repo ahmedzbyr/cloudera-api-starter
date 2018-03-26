@@ -12,10 +12,10 @@ cloudera_manager:
 
   cm_advance_config:
     tsquery_streams_limit: 1000
-    remote_parcel_repo_urls: http://archive.cloudera.com/cdh5/parcels/5.12.2,
+    remote_parcel_repo_urls: http://127.0.0.1/archive.cloudera.com/cdh5/parcels/5.12.2,
       http://archive.cloudera.com/accumulo/parcels/1.4/,
       http://archive.cloudera.com/accumulo-c5/parcels/latest/,
-      http://archive.cloudera.com/kafka/parcels/latest/,
+      http://archive.cloudera.com/kafka/parcels/3.0.0/,
       http://archive.cloudera.com/navigator-keytrustee5/parcels/latest/,
       http://archive.cloudera.com/spark/parcels/latest/,
       http://archive.cloudera.com/sqoop-connectors/parcels/latest/
@@ -30,7 +30,7 @@ cloudera_manager:
             firehose_database_host: cloudera-cluster-cloudera-manager.vagrantup.com
             firehose_database_user: amon
             firehose_database_password: TG7Fc4WbHhXMXd9b
-            firehose_database_type: postgresql
+            firehose_database_type: mysql
             firehose_database_name: amon
         - group: ALERTPUBLISHER
           hosts:
@@ -51,7 +51,7 @@ cloudera_manager:
             headlamp_database_host: cloudera-cluster-cloudera-manager.vagrantup.com
             headlamp_database_user: rman
             headlamp_database_password: dBteu3xUduKzx4u2
-            headlamp_database_type: postgresql
+            headlamp_database_type: mysql
             headlamp_database_name: rman
 
 host_installation:

@@ -6,7 +6,33 @@ import time, sys, yaml, logging, argparse
 from cm_api.api_client import ApiResource, ApiException
 from cm_api.endpoints.services import ApiServiceSetupInfo
 import os
+from functools import wraps
 from subprocess import call
+
+
+
+def retry(attempts=3, delay=5):
+    """Function which reruns/retries other functions.
+    'attempts' - the number of attempted retries (defaults to 3)
+    'delay' - time in seconds between each retry (defaults to 5)
+    """
+    def deco_retry(func):
+        """Main decorator function."""
+        @wraps(func)
+        def retry_loop(*args, **kwargs):
+            """Main num_tries loop."""
+            attempt_counter = 1
+            while attempt_counter <= attempts:
+                try:
+                    return func(*args, **kwargs)
+                except ApiException as apie:  # pylint: disable=broad-except,catching-non-exception
+                    if attempt_counter == attempts:
+                        # pylint: disable=raising-bad-type
+                        raise
+                    time.sleep(delay)
+                    attempt_counter += 1
+        return retry_loop
+    return deco_retry
 
 
 class ClouderaManagerSetup():
@@ -163,6 +189,73 @@ class ClouderaManagerSetup():
 
 
 
+class ParcelsSetup():
+
+    def __init__(self, cluster_to_deploy, parcel_version, parcel_name='CDH'):
+        self.cluster_to_deploy = cluster_to_deploy
+        self.parcel_version = parcel_version
+        self.parcel_name = parcel_name
+
+
+    # def get_parcel(self, product, version):
+    #     """
+    #     Lookup a parcel by product and version.
+    #
+    #     @param product: the product name
+    #     @param version: the product version
+    #     @return: An ApiParcel object
+    #     """
+
+    @property
+    def parcel(self):
+        #
+        # Returns https://cloudera.github.io/cm_api/apidocs/v15/ns0_apiParcel.html
+        #
+        return self.cluster_to_deploy.get_parcel(self.parcel_name, self.parcel_version)
+
+
+
+    def check_for_parcel_error(self, parcel_state):
+        if parcel_state.state.errors:
+            logging.error(parcel_state.state.errors)
+            sys.exit(1)
+
+
+    def check_parcel_availability (self):
+
+        logging.debug("Current State:" + str(self.parcel.stage))
+        if self.parcel.stage in ['AVAILABLE_REMOTELY', 'DOWNLOADED', 'DOWNLOADING',
+                                 'DISTRIBUTING', 'DISTRIBUTED', 'ACTIVATING', 'ACTIVATED']:
+            logging.info("Parcel is AVAILABLE, we can proceed")
+        else:
+            logging.error("Parcel Not AVAILABLE, exiting Now. Check Parcel Version and Name")
+            sys.exit(1)
+
+
+    @retry(attempts=20, delay=30)
+    def check_parcel_state(self, current_state):
+        parcel = self.parcel
+        self.check_for_parcel_error(parcel)
+        if parcel.stage in current_state:
+            return
+        else:
+            logging.info("{} progress: {} / {}".format(current_state[0], parcel.state.progress, parcel.state.totalProgress))
+            raise ApiException("Waiting for {}".format(current_state[0]))
+
+
+    def parcel_download(self):
+        self.check_parcel_availability()
+        self.parcel.start_download()
+        self.check_parcel_state(['DOWNLOADED', 'DISTRIBUTED', 'ACTIVATED', 'INUSE'])
+
+    def parcel_distribute(self):
+        self.parcel.start_distribution()
+        self.check_parcel_state(['DISTRIBUTED', 'ACTIVATED', 'INUSE'])
+
+    def parcel_activate(self):
+        self.parcel.activate()
+        self.check_parcel_state(['ACTIVATED', 'INUSE'])
+
 class Clusters(ClouderaManagerSetup):
 
 
@@ -210,8 +303,23 @@ class Clusters(ClouderaManagerSetup):
             #
             self.cluster[cluster['cluster']].add_hosts(hosts)
 
+
         return self.cluster
 
+
+    def activate_parcels_all_cluster(self):
+        for cluster_to_deploy in config['clusters']:
+            for parcel_cfg in cluster_to_deploy['parcels']:
+                parcel = ParcelsSetup(self.cluster[cluster_to_deploy['cluster']], parcel_cfg.get('version'),
+                                      parcel_cfg.get('product', 'CDH'))
+                parcel.parcel_download()
+                parcel.parcel_distribute()
+                parcel.parcel_activate()
+
+
+    def setup(self):
+        self.init_cluster()
+        self.activate_parcels_all_cluster()
 
 
 if __name__ == '__main__':
@@ -242,13 +350,11 @@ if __name__ == '__main__':
         for item in config['clusters']:
             print item['hosts']
 
-        cloudera_manager_setup = ClouderaManagerSetup(config)
-        cloudera_manager_setup.setup()
+        cloudera_manager = ClouderaManagerSetup(config)
+        cloudera_manager.setup()
 
         cluster = Clusters(config)
-        cluster.init_cluster()
-        cluster.update_adv_cm_config()
-
+        cluster.setup()
 
     except IOError as e:
         logging.error("ERROR {0}. EXIT NOW :( !!!!".format(e))
