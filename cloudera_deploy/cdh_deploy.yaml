@@ -107,7 +107,7 @@ clusters:
         roles:
           - group: KAFKA_BROKER
             config:
-              log.dirs: /hadoop/ms/kafka/data
+              log.dirs: /datastore/hadoop/kafka/data
               broker_max_heap_size: 1024
             hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
