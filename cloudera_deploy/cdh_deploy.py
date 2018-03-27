@@ -8,7 +8,7 @@ from cm_api.endpoints.services import ApiServiceSetupInfo
 import os
 from functools import wraps
 
-BASE_HADOOP_SERVICES = ['Zookeeper']
+BASE_HADOOP_SERVICES = ['Zookeeper', 'Kafka']
 
 def retry(exception_to_check=ApiException, tries=4, delay=3, backoff=2, logger=None):
     """Retry calling the decorated function using an exponential backoff.
@@ -419,7 +419,7 @@ class CoreServices(object):
         role_id = 0
         for host in role.get('hosts', []):
             role_id += 1
-            role_name = '{}-{}-{}'.format(self.service_name, group, role_id)
+            role_name = '{}-{}-{}'.format(self.service_type, group, role_id)
             try:
                 self.service.get_role(role_name)
             except ApiException:
@@ -460,6 +460,13 @@ class Zookeeper(CoreServices):
         if not self.service_name.init_zookeeper().wait(60).success:
             raise ApiException('Retry Command')
         return
+
+
+class Kafka(CoreServices):
+    """
+    Service Role Groups:
+        KAFKA_BROKER
+    """
 
 
 if __name__ == '__main__':

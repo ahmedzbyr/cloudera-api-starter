@@ -99,6 +99,19 @@ clusters:
               dataLogDir: /var/lib/zookeeper
               dataDir: /var/lib/zookeeper
 
+      KAFKA:
+        config:
+          zookeeper_service: ZOOKEEPER-1
+          zookeeper.chroot: /kafka
+          default.replication.factor: 3
+        roles:
+          - group: KAFKA_BROKER
+            config:
+              log.dirs: /hadoop/ms/kafka/data
+              broker_max_heap_size: 1024
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+
 #  - cluster: ZookeeperCluster
 #    version: CDH5
 #    fullVersion: 5.12.2
