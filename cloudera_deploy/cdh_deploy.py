@@ -38,7 +38,7 @@ def retry(exception_to_check=ApiException, tries=4, delay=3, backoff=2, logger=N
                 except exception_to_check, e:
                     msg = "%s, Retrying in %d seconds..." % (str(e), mdelay)
                     if logger:
-                        logger.warning(msg)
+                        logging.warning(msg)
                     else:
                         print msg
                     time.sleep(mdelay)
@@ -51,7 +51,7 @@ def retry(exception_to_check=ApiException, tries=4, delay=3, backoff=2, logger=N
     return deco_retry
 
 
-class ClouderaManagerSetup():
+class ClouderaManagerSetup(object):
 
     def __init__(self, config, trial_version=True, license_information=None):
         self.config = config
@@ -197,7 +197,7 @@ class ClouderaManagerSetup():
         self.deploy_cloudera_management_services()
 
 
-class ParcelsSetup():
+class ParcelsSetup(object):
 
     def __init__(self, cluster_to_deploy, parcel_version, parcel_name='CDH'):
         self.cluster_to_deploy = cluster_to_deploy
@@ -303,9 +303,136 @@ class Clusters(ClouderaManagerSetup):
                 parcel.parcel_distribute()
                 parcel.parcel_activate()
 
+    def deploy_services_on_cluster(self):
+        for cluster_to_deploy in config['clusters']:
+            svc = Zookeeper(self.cluster[cluster_to_deploy['cluster']], cluster_to_deploy['services']['ZOOKEEPER'] )
+            svc.deploy_service()
+            svc.service_start()
+
     def setup(self):
         self.init_cluster()
         self.activate_parcels_all_cluster()
+        self.deploy_services_on_cluster()
+
+
+class CoreServices(object):
+
+    def __init__(self, cluster_to_deploy, service_config):
+        self.cluster_to_deploy = cluster_to_deploy
+        self.service_config = service_config
+        self._service = None
+
+    @property
+    def service_type(self):
+        return self.__class__.__name__.upper()
+
+    @property
+    def service_name(self):
+        return self.service_type + str('-1')
+
+    @property
+    def service(self):
+        if self._service is not None:
+            return self._service
+        try:
+            self._service = self.cluster_to_deploy.get_service(self.service_name)
+            logging.debug("Service {0} already present on the cluster".format(self.service_name))
+        except ApiException:
+            self._service = self.cluster_to_deploy.create_service(self.service_name, self.service_type)
+            logging.debug("Service {0} created on cluster".format(self.service_name))
+        return self._service
+
+    @property
+    def check_service_start(self):
+        if self.service.serviceState == 'STARTED':
+            for role in self.service.get_all_roles():
+                if role.type != 'GATEWAY' and role.roleState != 'STARTED':
+                    return False
+            return True
+        return False
+
+    def deploy_service(self):
+        """
+        Update group configs. Create roles and update role specific configs.
+        """
+
+        # Service creation and config updates
+        self.service.update_config(self.service_config.get('config', {}))
+
+        # Retrieve base role config groups, update configs for those and create individual roles
+        # per host
+        if not self.service_config.get('roles'):
+            raise Exception("[{}] Atleast one role should be specified per service".format(self.service_name))
+        for role in self.service_config['roles']:
+            if not role.get('group') and role.get('hosts'):
+                raise Exception("[{}] group and hosts should be specified per role".format(self.service_name))
+            group = role['group']
+            role_group = self.service.get_role_config_group('{}-{}-BASE'.format(self.service_name, group))
+            role_group.update_config(role.get('config', {}))
+            self.create_roles(role, group)
+
+    @retry(ApiException, tries=3, delay=30, backoff=2, logger=True)
+    def service_start(self):
+        # setting the private place holder to None
+        self._service = None
+        if not self.check_service_start:
+            command = self.service.start()
+            if not command.wait(300).success:
+                if command.resultMessage is not None and \
+                        'There is already a pending command on this entity' in command.resultMessage:
+                    raise ApiException('Retry Command')
+                if 'Command Start is not currently available for execution' in command.resultMessage:
+                    raise ApiException('Retry Command')
+                raise Exception("Service {} Failed to Start".format(self.service_name))
+        # Making sure the place holder is None
+        self._service = None
+
+    def create_roles(self, role, group):
+
+        role_id = 0
+        for host in role.get('hosts', []):
+            role_id += 1
+            role_name = '{}-{}-{}'.format(self.service_name, group, role_id)
+            try:
+                self.service.get_role(role_name)
+            except ApiException:
+                self.service.create_role(role_name, group, host)
+
+    def init_service(self):
+        """
+        Any service specific actions that needs to be performed before the cluster is started.
+        Each service subclass can implement and hook into the pre-start process.
+        """
+        pass
+
+    def post_start(self):
+        """
+        Post cluster start actions required to be performed on a per service basis.
+        """
+        pass
+
+
+class Zookeeper(CoreServices):
+    """
+    Service Role Groups:
+        SERVER
+    """
+    def create_roles(self, role, group):
+        role_id = 0
+        for host in role['hosts']:
+            role_id += 1
+            role_name = '{}-{}-{}'.format(self.service_type, group, role_id)
+            try:
+                role = self.service.get_role(role_name)
+            except ApiException:
+                role = self.service.create_role(role_name, group, host)
+            role.update_config({'serverId': role_id})
+
+    @retry(ApiException, tries=3, delay=30, backoff=1, logger=True)
+    def init_service(self):
+        if not self.service_name.init_zookeeper().wait(60).success:
+            raise ApiException('Retry Command')
+        return
 
 
 if __name__ == '__main__':
