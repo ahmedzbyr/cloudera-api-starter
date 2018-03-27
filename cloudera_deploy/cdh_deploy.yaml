@@ -68,7 +68,7 @@ host_installation:
 
 clusters:
   # Basic cluster information
-  - cluster: BaseHadoopCluster
+  - cluster: BaseCDH
     version: CDH5
     fullVersion: 5.12.2
     hosts: ["cloudera-cluster-cloudera-manager.vagrantup.com"]
@@ -101,7 +101,7 @@ clusters:
 
       KAFKA:
         config:
-          zookeeper_service: ZOOKEEPER-1
+          zookeeper_service: ZOOKEEPER-BASECDH
           zookeeper.chroot: /kafka
           default.replication.factor: 3
         roles:

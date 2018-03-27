@@ -318,7 +318,7 @@ class Clusters(ClouderaManagerSetup):
         for cluster_to_deploy in config['clusters']:
             for cluster_services in BASE_HADOOP_SERVICES:
                 svc = getattr(sys.modules[__name__], cluster_services.capitalize())(self.cluster[cluster_to_deploy['cluster']],
-                                cluster_to_deploy['services'][cluster_services.upper()])
+                                cluster_to_deploy['services'][cluster_services.upper()], cluster_to_deploy['cluster'])
                 if not svc.check_service_start:
                     svc.deploy_service()
                     svc.pre_start_configuration()
@@ -330,7 +330,7 @@ class Clusters(ClouderaManagerSetup):
 
             for cluster_services in BASE_HADOOP_SERVICES:
                 svc = getattr(sys.modules[__name__], cluster_services)(self.cluster[cluster_to_deploy['cluster']],
-                                cluster_to_deploy['services'][cluster_services.upper()])
+                                cluster_to_deploy['services'][cluster_services.upper()], cluster_to_deploy['cluster'])
                 if not svc.check_service_start:
                     svc.service_start()
                     svc.post_start_configuration()
@@ -344,9 +344,10 @@ class Clusters(ClouderaManagerSetup):
 
 class CoreServices(object):
 
-    def __init__(self, cluster_to_deploy, service_config):
+    def __init__(self, cluster_to_deploy, service_config, cluster_name):
         self.cluster_to_deploy = cluster_to_deploy
         self.service_config = service_config
+        self.cluster_name = cluster_name
         self._service = None
 
     @property
@@ -355,7 +356,7 @@ class CoreServices(object):
 
     @property
     def service_name(self):
-        return self.service_type + str('-1')
+        return self.service_type + '-' + str(self.cluster_name).upper()
 
     @property
     def service(self):
@@ -408,7 +409,8 @@ class CoreServices(object):
                 if command.resultMessage is not None and \
                         'There is already a pending command on this entity' in command.resultMessage:
                     raise ApiException('Retry Command')
-                if 'Command Start is not currently available for execution' in command.resultMessage:
+                if command.resultMessage is not None and \
+                        'Command Start is not currently available for execution' in command.resultMessage:
                     raise ApiException('Retry Command')
                 raise Exception("Service {} Failed to Start".format(self.service_name))
         # Making sure the place holder is None
@@ -455,12 +457,13 @@ class Zookeeper(CoreServices):
                 role = self.service.create_role(role_name, group, host)
             role.update_config({'serverId': role_id})
 
-    @retry(ApiException, tries=3, delay=30, backoff=1, logger=True)
     def pre_start_configuration(self):
-        if not self.service_name.init_zookeeper().wait(60).success:
-            raise ApiException('Retry Command')
-        return
-
+        try:
+            command = self.service.init_zookeeper().wait()
+            logging.debug("Zookeeper Init Message: " + str(command.resultMessage))
+            time.sleep(10)
+        except ApiException:
+            logging.info("Already Init")
 
 class Kafka(CoreServices):
     """
