@@ -7,36 +7,51 @@ from cm_api.api_client import ApiResource, ApiException
 from cm_api.endpoints.services import ApiServiceSetupInfo
 import os
 from functools import wraps
-from subprocess import call
 
 
+def retry(exception_to_check=ApiException, tries=4, delay=3, backoff=2, logger=None):
+    """Retry calling the decorated function using an exponential backoff.
 
-def retry(attempts=3, delay=5):
-    """Function which reruns/retries other functions.
-    'attempts' - the number of attempted retries (defaults to 3)
-    'delay' - time in seconds between each retry (defaults to 5)
+    http://www.saltycrane.com/blog/2009/11/trying-out-retry-decorator-python/
+    original from: http://wiki.python.org/moin/PythonDecoratorLibrary#Retry
+
+    :param exception_to_check: the exception to check. may be a tuple of
+        exceptions to check
+    :type exception_to_check: Exception or tuple
+    :param tries: number of times to try (not retry) before giving up
+    :type tries: int
+    :param delay: initial delay between retries in seconds
+    :type delay: int
+    :param backoff: backoff multiplier e.g. value of 2 will double the delay each retry
+    :type backoff: int
+    :param logger: logger to use. If None, print
+    :type logger: logging.Logger instance
     """
-    def deco_retry(func):
-        """Main decorator function."""
-        @wraps(func)
-        def retry_loop(*args, **kwargs):
-            """Main num_tries loop."""
-            attempt_counter = 1
-            while attempt_counter <= attempts:
+    def deco_retry(f):
+
+        @wraps(f)
+        def f_retry(*args, **kwargs):
+            mtries, mdelay = tries, delay
+            while mtries > 1:
                 try:
-                    return func(*args, **kwargs)
-                except ApiException as apie:  # pylint: disable=broad-except,catching-non-exception
-                    if attempt_counter == attempts:
-                        # pylint: disable=raising-bad-type
-                        raise
-                    time.sleep(delay)
-                    attempt_counter += 1
-        return retry_loop
+                    return f(*args, **kwargs)
+                except exception_to_check, e:
+                    msg = "%s, Retrying in %d seconds..." % (str(e), mdelay)
+                    if logger:
+                        logger.warning(msg)
+                    else:
+                        print msg
+                    time.sleep(mdelay)
+                    mtries -= 1
+                    mdelay *= backoff
+            return f(*args, **kwargs)
+
+        return f_retry  # true decorator
+
     return deco_retry
 
 
 class ClouderaManagerSetup():
-
 
     def __init__(self, config, trial_version=True, license_information=None):
         self.config = config
@@ -61,13 +76,11 @@ class ClouderaManagerSetup():
 
         return self._api_resource
 
-
     @property
     def cloudera_manager_handle(self):
         if self._cloudera_manager_handle is None:
             self._cloudera_manager_handle = self.api_resource.get_cloudera_manager()
         return  self._cloudera_manager_handle
-
 
     def enable_trial_license_for_cm(self):
 
@@ -76,7 +89,6 @@ class ClouderaManagerSetup():
             logging.debug("Currently Lic Information: " + str(cloudera_license))
         except ApiException:
             self.cloudera_manager_handle.begin_trial()
-
 
     def update_adv_cm_config(self):
         self.cloudera_manager_handle.update_config(self.config['cloudera_manager']['cm_advance_config'])
@@ -111,7 +123,6 @@ class ClouderaManagerSetup():
 
                 exit()
 
-
     def deploy_cloudera_management_services(self):
 
         """
@@ -133,7 +144,6 @@ class ClouderaManagerSetup():
             if mgmt_service.serviceState == "STARTED":
                 logging.info("MGMT service already created on the server")
                 return
-
 
         except ApiException:
             #
@@ -180,13 +190,11 @@ class ClouderaManagerSetup():
         else:
             logging.ERROR("[MGMT] Cloudera Management services didn't start up properly")
 
-
     def setup(self):
         self.enable_trial_license_for_cm()
         self.update_adv_cm_config()
         #self.host_installation()
         self.deploy_cloudera_management_services()
-
 
 
 class ParcelsSetup():
@@ -196,16 +204,6 @@ class ParcelsSetup():
         self.parcel_version = parcel_version
         self.parcel_name = parcel_name
 
-
-    # def get_parcel(self, product, version):
-    #     """
-    #     Lookup a parcel by product and version.
-    #
-    #     @param product: the product name
-    #     @param version: the product version
-    #     @return: An ApiParcel object
-    #     """
-
     @property
     def parcel(self):
         #
@@ -213,35 +211,30 @@ class ParcelsSetup():
         #
         return self.cluster_to_deploy.get_parcel(self.parcel_name, self.parcel_version)
 
-
-
-    def check_for_parcel_error(self, parcel_state):
-        if parcel_state.state.errors:
-            logging.error(parcel_state.state.errors)
+    def check_for_parcel_error(self):
+        if self.parcel.state.errors:
+            logging.error(self.parcel.state.errors)
             sys.exit(1)
 
-
     def check_parcel_availability (self):
-
         logging.debug("Current State:" + str(self.parcel.stage))
         if self.parcel.stage in ['AVAILABLE_REMOTELY', 'DOWNLOADED', 'DOWNLOADING',
                                  'DISTRIBUTING', 'DISTRIBUTED', 'ACTIVATING', 'ACTIVATED']:
             logging.info("Parcel is AVAILABLE, we can proceed")
         else:
-            logging.error("Parcel Not AVAILABLE, exiting Now. Check Parcel Version and Name")
+            logging.error("Parcel NOT AVAILABLE, Exit Now. Check Parcel Version and Name")
             sys.exit(1)
 
-
-    @retry(attempts=20, delay=30)
+    @retry(ApiException, tries=60, delay=10, backoff=1, logger=True)
     def check_parcel_state(self, current_state):
         parcel = self.parcel
-        self.check_for_parcel_error(parcel)
+        self.check_for_parcel_error()
         if parcel.stage in current_state:
             return
         else:
-            logging.info("{} progress: {} / {}".format(current_state[0], parcel.state.progress, parcel.state.totalProgress))
+            logging.info("{} progress: {} / {}".format(current_state[0], parcel.state.progress,
+                                                       parcel.state.totalProgress))
             raise ApiException("Waiting for {}".format(current_state[0]))
-
 
     def parcel_download(self):
         self.check_parcel_availability()
@@ -256,30 +249,28 @@ class ParcelsSetup():
         self.parcel.activate()
         self.check_parcel_state(['ACTIVATED', 'INUSE'])
 
-class Clusters(ClouderaManagerSetup):
 
+class Clusters(ClouderaManagerSetup):
 
     def init_cluster(self):
 
         logging.debug(config['clusters'])
-
-        for cluster in config['clusters']:
+        for cluster_to_init in config['clusters']:
             try:
 
-                self.cluster[cluster['cluster']] = self.api_resource.get_cluster(cluster['cluster'])
+                self.cluster[cluster_to_init['cluster']] = self.api_resource.get_cluster(cluster_to_init['cluster'])
                 logging.debug("Cluster Already Exists:" + str(self.cluster))
                 return self.cluster
 
             except ApiException:
-                self.cluster[cluster['cluster']] = self.api_resource.create_cluster(cluster['cluster'],
-                                                        cluster['version'],
-                                                        cluster['fullVersion'])
-
+                self.cluster[cluster_to_init['cluster']] = self.api_resource.create_cluster(cluster_to_init['cluster'],
+                                                        cluster_to_init['version'],
+                                                        cluster_to_init['fullVersion'])
 
                 logging.debug("Cluster Created:" + str(self.cluster))
 
             cluster_hosts = [self.api_resource.get_host(host.hostId).hostname
-                             for host in self.cluster[cluster['cluster']].list_hosts()]
+                             for host in self.cluster[cluster_to_init['cluster']].list_hosts()]
             logging.info('Nodes already in Cluster: ' + str(cluster_hosts))
 
             #
@@ -290,22 +281,18 @@ class Clusters(ClouderaManagerSetup):
             #
             # Create a host list, make sure we dont have duplicates.
             #
-            for host in cluster['hosts']:
+            for host in cluster_to_init['hosts']:
                 if host not in cluster_hosts:
                     hosts.append(host)
 
-
-            #
             logging.info("Adding new nodes:" + str(hosts))
 
             #
             # Adding all hosts to the cluster.
             #
-            self.cluster[cluster['cluster']].add_hosts(hosts)
-
+            self.cluster[cluster_to_init['cluster']].add_hosts(hosts)
 
         return self.cluster
-
 
     def activate_parcels_all_cluster(self):
         for cluster_to_deploy in config['clusters']:
@@ -315,7 +302,6 @@ class Clusters(ClouderaManagerSetup):
                 parcel.parcel_download()
                 parcel.parcel_distribute()
                 parcel.parcel_activate()
-
 
     def setup(self):
         self.init_cluster()
