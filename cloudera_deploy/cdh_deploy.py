@@ -8,6 +8,7 @@ from cm_api.endpoints.services import ApiServiceSetupInfo
 import os
 from functools import wraps
 
+BASE_HADOOP_SERVICES = ['Zookeeper']
 
 def retry(exception_to_check=ApiException, tries=4, delay=3, backoff=2, logger=None):
     """Retry calling the decorated function using an exponential backoff.
@@ -303,11 +304,37 @@ class Clusters(ClouderaManagerSetup):
                 parcel.parcel_distribute()
                 parcel.parcel_activate()
 
+    @retry(ApiException, tries=3, delay=10, backoff=1, logger=True)
+    def cluster_deploy_client_config(self, cluster_to_deploy):
+        command = cluster_to_deploy.deploy_client_config()
+        if not command.wait(300).success:
+            if command.resultMessage is not None and \
+                    'There is already a pending command on this entity' in command.resultMessage:
+                raise ApiException('Retry Command')
+            if 'is not currently available for execution' in command.resultMessage:
+                raise ApiException('Retry Command')
+
     def deploy_services_on_cluster(self):
         for cluster_to_deploy in config['clusters']:
-            svc = Zookeeper(self.cluster[cluster_to_deploy['cluster']], cluster_to_deploy['services']['ZOOKEEPER'] )
-            svc.deploy_service()
-            svc.service_start()
+            for cluster_services in BASE_HADOOP_SERVICES:
+                svc = getattr(sys.modules[__name__], cluster_services.capitalize())(self.cluster[cluster_to_deploy['cluster']],
+                                cluster_to_deploy['services'][cluster_services.upper()])
+                if not svc.check_service_start:
+                    svc.deploy_service()
+                    svc.pre_start_configuration()
+
+            try:
+                self.cluster_deploy_client_config(self.cluster[cluster_to_deploy['cluster']])
+            except ApiException:
+                pass
+
+            for cluster_services in BASE_HADOOP_SERVICES:
+                svc = getattr(sys.modules[__name__], cluster_services)(self.cluster[cluster_to_deploy['cluster']],
+                                cluster_to_deploy['services'][cluster_services.upper()])
+                if not svc.check_service_start:
+                    svc.service_start()
+                    svc.post_start_configuration()
+
 
     def setup(self):
         self.init_cluster()
@@ -398,14 +425,14 @@ class CoreServices(object):
             except ApiException:
                 self.service.create_role(role_name, group, host)
 
-    def init_service(self):
+    def pre_start_configuration(self):
         """
         Any service specific actions that needs to be performed before the cluster is started.
         Each service subclass can implement and hook into the pre-start process.
         """
         pass
 
-    def post_start(self):
+    def post_start_configuration(self):
         """
         Post cluster start actions required to be performed on a per service basis.
         """
@@ -429,7 +456,7 @@ class Zookeeper(CoreServices):
             role.update_config({'serverId': role_id})
 
     @retry(ApiException, tries=3, delay=30, backoff=1, logger=True)
-    def init_service(self):
+    def pre_start_configuration(self):
         if not self.service_name.init_zookeeper().wait(60).success:
             raise ApiException('Retry Command')
         return
