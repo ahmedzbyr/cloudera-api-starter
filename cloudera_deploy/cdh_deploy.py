@@ -7,6 +7,7 @@ from cm_api.api_client import ApiResource, ApiException
 from cm_api.endpoints.services import ApiServiceSetupInfo
 import os
 from functools import wraps
+from cm_api.endpoints.services import ApiServiceSetupInfo, ApiBulkCommandList
 
 BASE_HADOOP_SERVICES = ['Zookeeper', 'Kafka']
 
@@ -51,6 +52,28 @@ def retry(exception_to_check=ApiException, tries=4, delay=3, backoff=2, logger=N
 
     return deco_retry
 
+
+@retry(ApiException, tries=3, delay=30, backoff=1, logger=True)
+def execute_cmd(func, service_name, timeout, fail_msg, *args, **kwargs):
+    """
+    Wrap retry checks for pre and post start commands that sometimes are not available to
+    execute immediately after configuring or starting a service
+    https://github.com/objectrocket/ansible-hadoop
+    """
+    def check(cmd, name, fail_msg, timeout, retry=True):
+        if not cmd.wait(timeout).success:
+            if retry:
+                if (cmd.resultMessage is not None and
+                        "is not currently available for execution" in cmd.resultMessage):
+                    raise ApiException('Retry command')
+            logging.error("{}. {}".format(fail_msg, cmd.resultMessage))
+
+    cmd = func(*args, **kwargs)
+    if isinstance(cmd, ApiBulkCommandList):
+        for cmdi in cmd:
+            check(cmdi, service_name, fail_msg, timeout, retry=False)
+    else:
+        check(cmd, service_name, fail_msg, timeout)
 
 class ClouderaManagerSetup(object):
 
@@ -379,6 +402,9 @@ class CoreServices(object):
             return True
         return False
 
+    def run_cmd(self, func, timeout, fail_msg, *args, **kwargs):
+        execute_cmd(func, self.service_name, timeout, fail_msg, *args, **kwargs)
+
     def deploy_service(self):
         """
         Update group configs. Create roles and update role specific configs.
@@ -442,10 +468,7 @@ class CoreServices(object):
 
 
 class Zookeeper(CoreServices):
-    """
-    Service Role Groups:
-        SERVER
-    """
+
     def create_roles(self, role, group):
         role_id = 0
         for host in role['hosts']:
@@ -458,12 +481,7 @@ class Zookeeper(CoreServices):
             role.update_config({'serverId': role_id})
 
     def pre_start_configuration(self):
-        try:
-            command = self.service.init_zookeeper().wait()
-            logging.debug("Zookeeper Init Message: " + str(command.resultMessage))
-            time.sleep(10)
-        except ApiException:
-            logging.info("Already Init")
+        self.run_cmd(self.service.init_zookeeper, 30, 'Init Zookeeper Failed.')
 
 class Kafka(CoreServices):
     """
