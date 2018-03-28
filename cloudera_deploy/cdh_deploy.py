@@ -4,7 +4,7 @@
 #
 import time, sys, yaml, logging, argparse
 from cm_api.api_client import ApiResource, ApiException
-from cm_api.endpoints.services import ApiServiceSetupInfo
+import re
 import os
 from functools import wraps
 from cm_api.endpoints.services import ApiServiceSetupInfo, ApiBulkCommandList
@@ -280,46 +280,54 @@ class Clusters(ClouderaManagerSetup):
 
         logging.debug(config['clusters'])
         for cluster_to_init in config['clusters']:
-            try:
+            self.initialize(cluster_to_init)
 
-                self.cluster[cluster_to_init['cluster']] = self.api_resource.get_cluster(cluster_to_init['cluster'])
-                logging.debug("Cluster Already Exists:" + str(self.cluster))
-                return self.cluster
+    def initialize(self, cluster_config):
 
-            except ApiException:
-                self.cluster[cluster_to_init['cluster']] = self.api_resource.create_cluster(cluster_to_init['cluster'],
-                                                        cluster_to_init['version'],
-                                                        cluster_to_init['fullVersion'])
+        logging.debug(cluster_config['cluster'])
+        try:
 
-                logging.debug("Cluster Created:" + str(self.cluster))
+            self.cluster[cluster_config['cluster']] = self.api_resource.get_cluster(cluster_config['cluster'])
+            logging.debug("Cluster Already Exists:" + str(self.cluster))
+            return
 
-            cluster_hosts = [self.api_resource.get_host(host.hostId).hostname
-                             for host in self.cluster[cluster_to_init['cluster']].list_hosts()]
-            logging.info('Nodes already in Cluster: ' + str(cluster_hosts))
+        except ApiException:
+            self.cluster[cluster_config['cluster']] = self.api_resource.create_cluster(cluster_config['cluster'],
+                                                                                        cluster_config['version'],
+                                                                                        cluster_config['fullVersion'])
 
-            #
-            # New hosts to be added to the cluster..
-            #
-            hosts = []
+            logging.debug("Cluster Created:" + str(self.cluster))
 
-            #
-            # Create a host list, make sure we dont have duplicates.
-            #
-            for host in cluster_to_init['hosts']:
-                if host not in cluster_hosts:
-                    hosts.append(host)
+        cluster_hosts = [self.api_resource.get_host(host.hostId).hostname
+                         for host in self.cluster[cluster_config['cluster']].list_hosts()]
+        logging.info('Nodes already in Cluster: ' + str(cluster_hosts))
 
-            logging.info("Adding new nodes:" + str(hosts))
+        #
+        # New hosts to be added to the cluster..
+        #
+        hosts = []
 
-            #
-            # Adding all hosts to the cluster.
-            #
-            self.cluster[cluster_to_init['cluster']].add_hosts(hosts)
+        #
+        # Create a host list, make sure we dont have duplicates.
+        #
+        for host in cluster_config['hosts']:
+            if host not in cluster_hosts:
+                hosts.append(host)
 
-        return self.cluster
+        logging.info("Adding new nodes:" + str(hosts))
+
+        #
+        # Adding all hosts to the cluster.
+        #
+        try:
+            self.cluster[cluster_config['cluster']].add_hosts(hosts)
+        except ApiException:
+            logging.error("Cannot `add_hosts`, Please check of the host is already part of an existing cluster.")
+            sys.exit(1)
 
     def activate_parcels_all_cluster(self):
         for cluster_to_deploy in config['clusters']:
+            logging.debug(cluster_to_deploy)
             for parcel_cfg in cluster_to_deploy['parcels']:
                 parcel = ParcelsSetup(self.cluster[cluster_to_deploy['cluster']], parcel_cfg.get('version'),
                                       parcel_cfg.get('product', 'CDH'))
@@ -444,10 +452,22 @@ class CoreServices(object):
 
     def create_roles(self, role, group):
 
-        role_id = 0
+        role_suffix = 0
         for host in role.get('hosts', []):
-            role_id += 1
-            role_name = '{}-{}-{}'.format(self.service_type, group, role_id)
+            role_suffix += 1
+
+            #
+            # When specifying roles to be created, the names provided for each role
+            # 	must not conflict with the names that CM auto-generates for roles.
+            # 	Specifically, names of the form "<service name>-<role type>-<arbitrary value>" cannot be used unless the
+            # 	<arbitrary value> is the same one CM would use. If CM detects such a
+            # 	conflict, the error message will indicate what <arbitrary value> is safe to use.
+            #
+            #	Alternately, a differently formatted name should be used.
+            #
+
+            role_name = '{}_{}_{}'.format(self.service_name, group, role_suffix)
+            logging.debug("Role name:" + role_name)
             try:
                 self.service.get_role(role_name)
             except ApiException:
@@ -470,15 +490,27 @@ class CoreServices(object):
 class Zookeeper(CoreServices):
 
     def create_roles(self, role, group):
-        role_id = 0
+        role_suffix = 0
         for host in role['hosts']:
-            role_id += 1
-            role_name = '{}-{}-{}'.format(self.service_type, group, role_id)
+            role_suffix += 1
+
+            #
+            # When specifying roles to be created, the names provided for each role
+            # 	must not conflict with the names that CM auto-generates for roles.
+            # 	Specifically, names of the form "<service name>-<role type>-<arbitrary value>" cannot be used unless the
+            # 	<arbitrary value> is the same one CM would use. If CM detects such a
+            # 	conflict, the error message will indicate what <arbitrary value> is safe to use.
+            #
+            #	Alternately, a differently formatted name should be used.
+            #
+
+            role_name = '{}_{}_{}'.format(self.service_name, group, role_suffix)
+            logging.debug("Role name:" + role_name)
             try:
                 role = self.service.get_role(role_name)
             except ApiException:
                 role = self.service.create_role(role_name, group, host)
-            role.update_config({'serverId': role_id})
+            role.update_config({'serverId': role_suffix})
 
     def pre_start_configuration(self):
         self.run_cmd(self.service.init_zookeeper, 30, 'Init Zookeeper Failed.')
