@@ -320,6 +320,7 @@ class Clusters(ClouderaManagerSetup):
         # Adding all hosts to the cluster.
         #
         try:
+            self.cluster[cluster_config['cluster']].rename(cluster_config['cluster_display_name'])
             self.cluster[cluster_config['cluster']].add_hosts(hosts)
         except ApiException:
             logging.error("Cannot `add_hosts`, Please check of the host is already part of an existing cluster.")

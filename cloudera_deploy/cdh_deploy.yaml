@@ -69,6 +69,7 @@ host_installation:
 clusters:
   # Basic cluster information
   - cluster: BaseCDH
+    cluster_display_name: Base CDH Cluster
     version: CDH5
     fullVersion: 5.12.2
     hosts: ["cloudera-cluster-cloudera-manager.vagrantup.com"]
@@ -114,6 +115,7 @@ clusters:
 
   # Basic cluster information
   - cluster: ZKCDH
+    cluster_display_name: Zookeeper/Kafka Cluster
     version: CDH5
     fullVersion: 5.12.2
     hosts: ["cloudera-cluster-master-node.vagrantup.com"]
