@@ -1,4 +1,3 @@
-
 #
 # Importing required modules.
 #
@@ -28,6 +27,7 @@ def retry(exception_to_check=ApiException, tries=4, delay=3, backoff=2, logger=N
     :param logger: logger to use. If None, print
     :type logger: logging.Logger instance
     """
+
     def deco_retry(f):
 
         @wraps(f)
@@ -59,6 +59,7 @@ def execute_cmd(func, service_name, timeout, fail_msg, *args, **kwargs):
     execute immediately after configuring or starting a service
     https://github.com/objectrocket/ansible-hadoop
     """
+
     def check(cmd, name, fail_msg, timeout, retry=True):
         if not cmd.wait(timeout).success:
             if retry:
@@ -106,7 +107,7 @@ class ClouderaManagerSetup(object):
                                              self.config['cloudera_manager']['authentication']['username'],
                                              self.config['cloudera_manager']['authentication']['password'],
                                              self.config['cloudera_manager']['authentication']['tls'],
-                                     version=self.config['cloudera_manager']['authentication']['api-version'])
+                                             version=self.config['cloudera_manager']['authentication']['api-version'])
 
         return self._api_resource
 
@@ -118,7 +119,7 @@ class ClouderaManagerSetup(object):
         """
         if self._cloudera_manager_handle is None:
             self._cloudera_manager_handle = self.api_resource.get_cloudera_manager()
-        return  self._cloudera_manager_handle
+        return self._cloudera_manager_handle
 
     def enable_trial_license_for_cm(self):
         """
@@ -147,15 +148,18 @@ class ClouderaManagerSetup(object):
         for nodes_in_cluster in self.config['clusters']:
 
             logging.info("Installing HOSTs.")
-            cmd = self.cloudera_manager_handle.host_install(self.config['host_installation']['authentication']['host_username'],
-                        nodes_in_cluster['hosts'],
-                        ssh_port=self.config['host_installation']['authentication']['host_ssh_port'],
-                        private_key=self.config['host_installation']['authentication']['host_private_key'],
-                        parallel_install_count=self.config['host_installation']['authentication']['host_parallel_install_count'],
-                        cm_repo_url=self.config['host_installation']['authentication']['host_cm_repo_url'],
-                        gpg_key_custom_url=self.config['host_installation']['authentication']['host_cm_repo_gpg_key_custom_url'],
-                        java_install_strategy=self.config['host_installation']['authentication']['host_java_install_strategy'],
-                        unlimited_jce=self.config['host_installation']['authentication']['host_unlimited_jce_policy'])
+            cmd = self.cloudera_manager_handle.host_install(
+                self.config['host_installation']['authentication']['host_username'],
+                nodes_in_cluster['hosts'],
+                ssh_port=self.config['host_installation']['authentication']['host_ssh_port'],
+                private_key=self.config['host_installation']['authentication']['host_private_key'],
+                parallel_install_count=self.config['host_installation']['authentication'][
+                    'host_parallel_install_count'],
+                cm_repo_url=self.config['host_installation']['authentication']['host_cm_repo_url'],
+                gpg_key_custom_url=self.config['host_installation']['authentication'][
+                    'host_cm_repo_gpg_key_custom_url'],
+                java_install_strategy=self.config['host_installation']['authentication']['host_java_install_strategy'],
+                unlimited_jce=self.config['host_installation']['authentication']['host_unlimited_jce_policy'])
 
             #
             # Check command to complete.
@@ -163,7 +167,7 @@ class ClouderaManagerSetup(object):
             if not cmd.wait().success:
                 logging.info("Command `host_install` Failed. {0} - EXITING NOW".format(cmd.resultMessage))
                 if (cmd.resultMessage is not None and
-                            'There is already a pending command on this entity' in cmd.resultMessage):
+                        'There is already a pending command on this entity' in cmd.resultMessage):
                     raise Exception("HOST INSTALLATION FAILED.")
 
                 exit()
@@ -244,7 +248,7 @@ class ClouderaManagerSetup(object):
         self.update_adv_cm_config()
 
         # Currently commented as we are setting this up using Chef, but we can enable it as required.
-        #self.host_installation()
+        # self.host_installation()
         self.deploy_cloudera_management_services()
 
 
@@ -277,7 +281,7 @@ class ParcelsSetup(object):
             logging.error(self.parcel.state.errors)
             sys.exit(1)
 
-    def check_parcel_availability (self):
+    def check_parcel_availability(self):
         """
             Check AVAIL Parcels. This will use the Advance CM configuration from the YAML.
         :return:
@@ -358,8 +362,8 @@ class Clusters(ClouderaManagerSetup):
 
         except ApiException:
             self.cluster[cluster_config['cluster']] = self.api_resource.create_cluster(cluster_config['cluster'],
-                                                                                        cluster_config['version'],
-                                                                                        cluster_config['fullVersion'])
+                                                                                       cluster_config['version'],
+                                                                                       cluster_config['fullVersion'])
 
             logging.debug("Cluster Created:" + str(self.cluster))
 
@@ -388,7 +392,8 @@ class Clusters(ClouderaManagerSetup):
             self.cluster[cluster_config['cluster']].rename(cluster_config['cluster_display_name'])
             self.cluster[cluster_config['cluster']].add_hosts(hosts)
         except ApiException:
-            logging.error("Cannot `add_hosts`, Please check if one or more of the hosts are NOT already part of an existing cluster.")
+            logging.error(
+                "Cannot `add_hosts`, Please check if one or more of the hosts are NOT already part of an existing cluster.")
             sys.exit(1)
 
     def activate_parcels_all_cluster(self):
@@ -430,8 +435,9 @@ class Clusters(ClouderaManagerSetup):
             #   Adding the services from the YAML file.
             #
             for cluster_services in cluster_to_deploy['services_to_install']:
-                svc = getattr(sys.modules[__name__], cluster_services.capitalize())(self.cluster[cluster_to_deploy['cluster']],
-                                cluster_to_deploy['services'][cluster_services.upper()], cluster_to_deploy['cluster'])
+                svc = getattr(sys.modules[__name__], cluster_services.capitalize())(
+                    self.cluster[cluster_to_deploy['cluster']],
+                    cluster_to_deploy['services'][cluster_services.upper()], cluster_to_deploy['cluster'])
                 if not svc.check_service_start:
                     svc.deploy_service()
                     svc.pre_start_configuration()
@@ -443,11 +449,12 @@ class Clusters(ClouderaManagerSetup):
 
             for cluster_services in cluster_to_deploy['services_to_install']:
                 svc = getattr(sys.modules[__name__], cluster_services)(self.cluster[cluster_to_deploy['cluster']],
-                                cluster_to_deploy['services'][cluster_services.upper()], cluster_to_deploy['cluster'])
+                                                                       cluster_to_deploy['services'][
+                                                                           cluster_services.upper()],
+                                                                       cluster_to_deploy['cluster'])
                 if not svc.check_service_start:
                     svc.service_start()
                     svc.post_start_configuration()
-
 
     def setup(self):
         """
@@ -634,6 +641,7 @@ class Zookeeper(CoreServices):
             Pre Start configuration to init the zookeeper.
         """
         self.run_cmd(self.service.init_zookeeper, 30, 'Init Zookeeper Failed.')
+
 
 class Kafka(CoreServices):
     """
