@@ -74,6 +74,7 @@ def execute_cmd(func, service_name, timeout, fail_msg, *args, **kwargs):
     else:
         check(cmd, service_name, fail_msg, timeout)
 
+
 class ClouderaManagerSetup(object):
 
     def __init__(self, config, trial_version=True, license_information=None):
@@ -234,7 +235,7 @@ class ClouderaManagerSetup(object):
         else:
             logging.ERROR("[MGMT] Cloudera Management services didn't start up properly")
 
-    def setup(self):
+    def setup_cdh_manager(self):
         """
             Core Method to run the rest of the methods.
         :return:
@@ -675,7 +676,7 @@ if __name__ == '__main__':
             print item['hosts']
 
         cloudera_manager = ClouderaManagerSetup(config)
-        cloudera_manager.setup()
+        cloudera_manager.setup_cdh_manager()
 
         cluster = Clusters(config)
         cluster.setup()
