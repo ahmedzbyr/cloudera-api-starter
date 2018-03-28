@@ -68,7 +68,7 @@ host_installation:
 
 clusters:
   # Basic cluster information
-  - cluster: &cluster_name !!python/object/apply:string.upper [BaseCDH] # Keep this CAPTITAL as we will using this tin each role and service.
+  - cluster: &base_cluster_name !!python/object/apply:string.upper [BaseCDH] # Keep this CAPTITAL as we will using this tin each role and service.
     services_to_install: ['Zookeeper', 'Hdfs']
     cluster_display_name: Base CDH Cluster
     version: CDH5
@@ -104,7 +104,7 @@ clusters:
 
       KAFKA:
         config:
-          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *cluster_name], '-']
+          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *base_cluster_name], '-']
           zookeeper.chroot: /kafka
           default.replication.factor: 3
         roles:
@@ -120,7 +120,7 @@ clusters:
           dfs_replication: 2
           dfs_permissions: false
           dfs_block_local_path_access_user: impala,hbase,mapred,spark
-          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *cluster_name], '-']
+          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *base_cluster_name], '-']
 
         roles:
           - group: NAMENODE
