@@ -165,7 +165,7 @@ class ClouderaManagerSetup(object):
             # Check command to complete.
             #
             if not cmd.wait().success:
-                logging.info("Command `host_install` Failed. {0} - EXITING NOW".format(cmd.resultMessage))
+                logging.info("Command `host_install` FAILED. {0} - EXITING NOW".format(cmd.resultMessage))
                 if (cmd.resultMessage is not None and
                         'There is already a pending command on this entity' in cmd.resultMessage):
                     raise Exception("HOST INSTALLATION FAILED.")
@@ -557,7 +557,7 @@ class CoreServices(object):
                 if command.resultMessage is not None and \
                         'Command Start is not currently available for execution' in command.resultMessage:
                     raise ApiException('Retry Command')
-                raise Exception("Service {} Failed to Start".format(self.service_name))
+                raise Exception("Service {} FAILED to Start".format(self.service_name))
         # Making sure the place holder is None
         self._service = None
 
@@ -640,7 +640,7 @@ class Zookeeper(CoreServices):
         """
             Pre Start configuration to init the zookeeper.
         """
-        self.run_cmd(self.service.init_zookeeper, 30, 'Init Zookeeper Failed.')
+        self.run_cmd(self.service.init_zookeeper, 30, 'Init Zookeeper FAILED.')
 
 
 class Kafka(CoreServices):
@@ -654,6 +654,116 @@ class Kafka(CoreServices):
 
     """
 
+
+class Hdfs(CoreServices):
+
+    @property
+    def active_namenode(self):
+        return '{}_NAMENODE_1'.format(self.service_name)
+
+    @property
+    def standby_namenode(self):
+        return '{}_NAMENODE_2'.format(self.service_name)
+
+    @property
+    def failover_primary(self):
+        return '{}_FAILOVERCONTROLLER_1'.format(self.service_name)
+
+    @property
+    def failover_secondary(self):
+        return '{}_FAILOVERCONTROLLER_2'.format(self.service_name)
+
+    @property
+    def ha(self):
+        try:
+            self.service.get_role('SECONDARYNAMENODE')
+            return False
+        except ApiException:
+            return True
+
+    def format_namenode(self):
+        self.run_cmd(self.service.format_hdfs, 300, "FAILED formatting HDFS, Continuing ...", self.active_namenode)
+
+    def pre_start_configuration(self):
+        if not self.ha:
+            self.format_namenode()
+            return
+
+        self.run_cmd(self.service.init_hdfs_auto_failover, 300, "FAILED setup FO Controller", self.failover_primary)
+        roles = [role.name for role in self.service.get_roles_by_type('JOURNALNODE')]
+        self.run_cmd(self.service.start_roles, 300, "Service start FAILED", *roles)
+        self.format_namenode()
+        self.run_cmd(self.service.start_roles, 300, "Service start FAILED", self.active_namenode)
+        self.run_cmd(self.service.bootstrap_hdfs_stand_by, 300, "Bootstrap Standby NN FAILED", self.standby_namenode)
+        self.run_cmd(self.service.start_roles, 300, "Service start FAILED", self.standby_namenode)
+        self.run_cmd(self.service.start_roles, 300, "Service start FAILED", self.failover_primary)
+        self.run_cmd(self.service.start_roles, 300, "Service start FAILED", self.failover_secondary)
+
+    def post_start_configuration(self):
+        self.run_cmd(self.service.create_hdfs_tmp, 60, "Command CreateHdfsTmp FAILED")
+
+
+class Yarn(CoreServices):
+    def pre_start_configuration(self):
+        self.run_cmd(self.service.create_yarn_job_history_dir, 60, "Command Create Job History Dir failed")
+        self.run_cmd(self.service.create_yarn_node_manager_remote_app_log_dir, 60, "Command Create NodeManager app dir failed")
+
+
+class Spark_On_Yarn(CoreServices):
+    def pre_start_configuration(self):
+        self.run_cmd(self.service._cmd, 60, "Cmd CreateSparkUserDir failed", 'CreateSparkUserDirCommand', api_version=7)
+        self.run_cmd(self.service._cmd, 60, "Cmd CreateSparkHistoryDirCommand failed", 'CreateSparkHistoryDirCommand', api_version=7)
+        self.run_cmd(self.service._cmd, 60, "Cmd SparkUploadJarServiceCommand failed", 'SparkUploadJarServiceCommand', api_version=7)
+
+
+class Hbase(CoreServices):
+    def pre_start_configuration(self):
+        self.run_cmd(self.service.create_hbase_root, 60, "Command CreateHbaseRoot failed")
+
+
+class Hive(CoreServices):
+    def pre_start_configuration(self):
+        self.run_cmd(self.service.create_hive_warehouse, 60, "Command CreateHiveWarehouse failed")
+        self.run_cmd(self.service.create_hive_metastore_database, 60, "Command CreateHiveMetastoreDatabase failed")
+        self.run_cmd(self.service.create_hive_metastore_tables, 60, "Command CreateHiveMetastoreTables failed")
+
+
+class Impala(CoreServices):
+    def pre_start_configuration(self):
+        self.run_cmd(self.service.create_impala_user_dir, 60, "Command CreateImpalaUserDir failed")
+
+
+class Flume(CoreServices):
+    """
+        Flume services
+    """
+
+class Hue(CoreServices):
+    """
+        Hue
+    """
+
+class Oozie(CoreServices):
+    def pre_start_configuration(self):
+        self.run_cmd(self.service.create_oozie_db, 300, "Command CreateOozieSchema failed")
+        self.run_cmd(self.service.install_oozie_sharelib, 300, "Command InstallOozieSharedLib failed")
+
+
+class Sqoop(CoreServices):
+    def pre_start_configuration(self):
+        self.run_cmd(self.service.create_sqoop_user_dir, 300, "Command CreateSqoopUserDir failed")
+        self.run_cmd(self.service.create_sqoop_database_tables, 300, "Command CreateSqoopDBTables failed")
+
+
+class Solr(CoreServices):
+    def pre_start_configuration(self):
+        self.run_cmd(self.service.init_solr, 300, "Command InitSolr failed")
+        self.run_cmd(self.service.create_solr_hdfs_home_dir, 300, "Command CreateSolrHdfsHomeDir failed")
+
+
+class Sentry(CoreServices):
+    def pre_start_configuration(self):
+        self.run_cmd(self.service.create_sentry_database_tables, 300, "Command CreateSentryDBTables failed")
 
 if __name__ == '__main__':
 
