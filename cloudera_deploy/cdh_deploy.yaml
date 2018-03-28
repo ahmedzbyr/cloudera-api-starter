@@ -73,7 +73,7 @@ clusters:
     cluster_display_name: Base CDH Cluster
     version: CDH5
     fullVersion: 5.12.2
-    hosts: ["cloudera-cluster-cloudera-manager.vagrantup.com"]
+    hosts: ["cloudera-cluster-cloudera-manager.vagrantup.com", "cloudera-cluster-master-node.vagrantup.com"]
 
 
     # Parcels
@@ -116,7 +116,7 @@ clusters:
 
 	  HDFS:
 		config:
-		  dfs_replication: 3
+		  dfs_replication: 2
 		  dfs_permissions: false
 		  dfs_block_local_path_access_user: impala,hbase,mapred,spark
 		  zookeeper_service: ZOOKEEPER-BASECDH
@@ -149,7 +149,7 @@ clusters:
 			config:
 			  dfs_data_dir_list: /datastore/hadoop/dfs/dn
 			  dfs_datanode_handler_count: 30
-			  dfs_datanode_du_reserved: 1073741824
+			  #dfs_datanode_du_reserved: 1073741824
 			  dfs_datanode_failed_volumes_tolerated: 0
 			  dfs_datanode_data_dir_perm: 755
 		  - group: GATEWAY

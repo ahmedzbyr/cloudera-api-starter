@@ -652,6 +652,7 @@ class Kafka(CoreServices):
         We can further add MIRROR_MAKER and GATEWAY from the YAML file.
         All we need to do is add the configuration in the YAML file.
 
+        Kafka Service
     """
 
 
@@ -735,12 +736,18 @@ class Impala(CoreServices):
 
 class Flume(CoreServices):
     """
-        Flume services
+        Service Role Groups: Nothing to do here as this is same as the core services.
+        Further configuration will come from the YAML file.
+
+        Flume service
     """
 
 class Hue(CoreServices):
     """
-        Hue
+        Service Role Groups: Nothing to do here as this is same as the core services.
+        Further configuration will come from the YAML file.
+
+        Hue Service
     """
 
 class Oozie(CoreServices):
