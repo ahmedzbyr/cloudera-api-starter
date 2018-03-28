@@ -69,6 +69,7 @@ host_installation:
 clusters:
   # Basic cluster information
   - cluster: BaseCDH
+    services_to_install: ['Zookeeper', 'Kafka']
     cluster_display_name: Base CDH Cluster
     version: CDH5
     fullVersion: 5.12.2
@@ -115,6 +116,7 @@ clusters:
 
   # Basic cluster information
   - cluster: ZKCDH
+    services_to_install: ['Zookeeper', 'Kafka']
     cluster_display_name: Zookeeper/Kafka Cluster
     version: CDH5
     fullVersion: 5.12.2

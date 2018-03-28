@@ -9,7 +9,6 @@ import os
 from functools import wraps
 from cm_api.endpoints.services import ApiServiceSetupInfo, ApiBulkCommandList
 
-BASE_HADOOP_SERVICES = ['Zookeeper', 'Kafka']
 
 def retry(exception_to_check=ApiException, tries=4, delay=3, backoff=2, logger=None):
     """Retry calling the decorated function using an exponential backoff.
@@ -427,9 +426,9 @@ class Clusters(ClouderaManagerSetup):
         """
         for cluster_to_deploy in config['clusters']:
             #
-            #   TODO: Need to make the `BASE_HADOOP_SERVICES` specific to each cluster.
+            #   Adding the services from the YAML file.
             #
-            for cluster_services in BASE_HADOOP_SERVICES:
+            for cluster_services in cluster_to_deploy['services_to_install']:
                 svc = getattr(sys.modules[__name__], cluster_services.capitalize())(self.cluster[cluster_to_deploy['cluster']],
                                 cluster_to_deploy['services'][cluster_services.upper()], cluster_to_deploy['cluster'])
                 if not svc.check_service_start:
@@ -441,7 +440,7 @@ class Clusters(ClouderaManagerSetup):
             except ApiException:
                 pass
 
-            for cluster_services in BASE_HADOOP_SERVICES:
+            for cluster_services in cluster_to_deploy['services_to_install']:
                 svc = getattr(sys.modules[__name__], cluster_services)(self.cluster[cluster_to_deploy['cluster']],
                                 cluster_to_deploy['services'][cluster_services.upper()], cluster_to_deploy['cluster'])
                 if not svc.check_service_start:
@@ -643,7 +642,7 @@ class Kafka(CoreServices):
 
         We can further add MIRROR_MAKER and GATEWAY from the YAML file.
         All we need to do is add the configuration in the YAML file.
-        
+
     """
 
 
