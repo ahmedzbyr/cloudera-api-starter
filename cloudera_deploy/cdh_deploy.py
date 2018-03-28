@@ -486,7 +486,7 @@ class CoreServices(object):
 
     @property
     def service_name(self):
-        return self.service_type + '-' + str(self.cluster_name).upper()
+        return self.service_type + '-' + str(self.cluster_name)
 
     @property
     def service(self):

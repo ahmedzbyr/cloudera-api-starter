@@ -68,7 +68,7 @@ host_installation:
 
 clusters:
   # Basic cluster information
-  - cluster: BaseCDH
+  - cluster: &base_cluster_name !!python/object/apply:string.upper [BaseCDH]
     services_to_install: ['Zookeeper', 'Kafka']
     cluster_display_name: Base CDH Cluster
     version: CDH5
@@ -95,7 +95,7 @@ clusters:
           - group: SERVER
             hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
+              - cloudera-cluster-master-node.vagrantup.com
             config:
               quorumPort: 2888
               electionPort: 3888
@@ -104,7 +104,7 @@ clusters:
 
       KAFKA:
         config:
-          zookeeper_service: ZOOKEEPER-BASECDH
+          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *base_cluster_name], '-']
           zookeeper.chroot: /kafka
           default.replication.factor: 3
         roles:
@@ -114,299 +114,299 @@ clusters:
               broker_max_heap_size: 1024
             hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
+              - cloudera-cluster-master-node.vagrantup.com
 
-	  HDFS:
-		config:
-		  dfs_replication: 3
-		  dfs_permissions: false
-		  dfs_block_local_path_access_user: impala,hbase,mapred,spark
-		  zookeeper_service: ZOOKEEPER-BASECDH
+      HDFS:
+        config:
+          dfs_replication: 3
+          dfs_permissions: false
+          dfs_block_local_path_access_user: impala,hbase,mapred,spark
+          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *base_cluster_name], '-']
 
-		roles:
-		  - group: NAMENODE
-			hosts:
+        roles:
+          - group: NAMENODE
+            hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-			config:
-			  dfs_name_dir_list: /datastore/hadoop/dfs/nn
-			  dfs_namenode_handler_count: 30
-			  dfs_federation_namenode_nameservice: hdfsHA
-			  dfs_namenode_quorum_journal_name: hdfsHA
-			  autofailover_enabled: true
-		  - group: JOURNALNODE
-			hosts:
+              - cloudera-cluster-master-node.vagrantup.com
+            config:
+              dfs_name_dir_list: /datastore/hadoop/dfs/nn
+              dfs_namenode_handler_count: 30
+              dfs_federation_namenode_nameservice: hdfsHA
+              dfs_namenode_quorum_journal_name: hdfsHA
+              autofailover_enabled: true
+          - group: JOURNALNODE
+            hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-			config:
-			  dfs_journalnode_edits_dir: /datastore/hadoop/journaldata/dfs/jn
-		  - group: FAILOVERCONTROLLER
-			hosts:
+              - cloudera-cluster-master-node.vagrantup.com
+            config:
+              dfs_journalnode_edits_dir: /datastore/hadoop/journaldata/dfs/jn
+          - group: FAILOVERCONTROLLER
+            hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-		  - group: DATANODE
-			hosts:
+              - cloudera-cluster-master-node.vagrantup.com
+          - group: DATANODE
+            hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-			config:
-			  dfs_data_dir_list: /datastore/hadoop/dfs/dn
-			  dfs_datanode_handler_count: 30
-			  dfs_datanode_du_reserved: 1073741824
-			  dfs_datanode_failed_volumes_tolerated: 0
-			  dfs_datanode_data_dir_perm: 755
-		  - group: GATEWAY
-			hosts:
+              - cloudera-cluster-master-node.vagrantup.com
+            config:
+              dfs_data_dir_list: /datastore/hadoop/dfs/dn
+              dfs_datanode_handler_count: 30
+              dfs_datanode_du_reserved: 1073741824
+              dfs_datanode_failed_volumes_tolerated: 0
+              dfs_datanode_data_dir_perm: 755
+          - group: GATEWAY
+            hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-			config:
-			  dfs_client_use_trash: true
-	  YARN:
-		config:
-		  hdfs_service: HDFS-BASECDH
-		  zookeeper_service: ZOOKEEPER-BASECDH
-		  yarn_rm_ha_cluster_id: yarnRM
+              - cloudera-cluster-master-node.vagrantup.com
+            config:
+              dfs_client_use_trash: true
+      YARN:
+        config:
+          hdfs_service: !!python/object/apply:string.join [[HDFS, *base_cluster_name], '-']
+          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *base_cluster_name], '-']
+          yarn_rm_ha_cluster_id: yarnRM
 
-		roles:
-		  - group: RESOURCEMANAGER
-			hosts:
+        roles:
+          - group: RESOURCEMANAGER
+            hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-		  - group: JOBHISTORY
-			hosts:
-              - cloudera-cluster-cloudera-manager.vagrantup.com
-
-		  - group: NODEMANAGER
-			hosts:
-              - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-			config:
-			  yarn_nodemanager_local_dirs: /datastore/hadoop/dfs/yarn/nm
-			  yarn_nodemanager_log_dirs: /datastore/hadoop/dfs/yarn/logs
-		  - group: GATEWAY
-			config:
-			  mapred_submit_replication: 3
-			hosts:
-              - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-	  SPARK_ON_YARN:
-		config:
-		  yarn_service: YARN-BASECDH
-		roles:
-		  - group: SPARK_YARN_HISTORY_SERVER
-			hosts:
-              - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-		  - group: GATEWAY
-			hosts:
-              - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-	  HBASE:
-		config:
-		  hdfs_service: HDFS-BASECDH
-		  zookeeper_service: ZOOKEEPER-BASECDH
-		  hbase_thriftserver_http: true
-		  hbase_thriftserver_support_proxyuser: true
-		roles:
-		  - group: MASTER
-			hosts:
-              - cloudera-cluster-cloudera-manager.vagrantup.com
-		  - group: REGIONSERVER
-			hosts:
-              - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-		  - group: HBASETHRIFTSERVER
-			hosts:
-              - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-		  - group: HBASERESTSERVER
-			hosts:
-              - cloudera-cluster-cloudera-manager.vagrantup.com
-		  - group: GATEWAY
-			hosts:
-              - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-	  HIVE:
-		config:
-		  hive_metastore_database_host: cloudera-cluster-cloudera-manager.vagrantup.com
-		  hive_metastore_database_name: metastore
-		  hive_metastore_database_user: hive
-		  hive_metastore_database_password: yMsSaAt2gPbHcKjf
-		  hive_metastore_database_port: 3306
-		  hive_metastore_database_type: mysql
-		  mapreduce_yarn_service: YARN-BASECDH
-		  spark_on_yarn_service: SPARK_ON_YARN-BASECDH
-		  zookeeper_service: ZOOKEEPER-BASECDH
-		  sentry_service: SENTRY-BASECDH
-		  hbase_service: HBASE-BASECDH
-		roles:
-		  - group: HIVEMETASTORE
-			config:
-			  hive_metastore_java_heapsize: 128306784
-			hosts:
-              - cloudera-cluster-cloudera-manager.vagrantup.com
-		  - group: HIVESERVER2
-			config:
-			  hiveserver2_enable_impersonation: false
-			hosts:
-              - cloudera-cluster-cloudera-manager.vagrantup.com
-		  - group: WEBHCAT
-			hosts:
-              - cloudera-cluster-cloudera-manager.vagrantup.com
-		  - group: GATEWAY
-			hosts:
-              - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-	  IMPALA:
-		config:
-		  hdfs_service: HDFS-BASECDH
-		  hive_service: HIVE-BASECDH
-		  hbase_service: HBASE-BASECDH
-		  sentry_service: SENTRY-BASECDH
-		roles:
-		  - group: STATESTORE
-			hosts:
+              - cloudera-cluster-master-node.vagrantup.com
+          - group: JOBHISTORY
+            hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
 
-		  - group: CATALOGSERVER
-			hosts:
+          - group: NODEMANAGER
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+              - cloudera-cluster-master-node.vagrantup.com
+            config:
+              yarn_nodemanager_local_dirs: /datastore/hadoop/dfs/yarn/nm
+              yarn_nodemanager_log_dirs: /datastore/hadoop/dfs/yarn/logs
+          - group: GATEWAY
+            config:
+              mapred_submit_replication: 3
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+              - cloudera-cluster-master-node.vagrantup.com
+      SPARK_ON_YARN:
+        config:
+          yarn_service: !!python/object/apply:string.join [[YARN, *base_cluster_name], '-']
+        roles:
+          - group: SPARK_YARN_HISTORY_SERVER
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+              - cloudera-cluster-master-node.vagrantup.com
+          - group: GATEWAY
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+              - cloudera-cluster-master-node.vagrantup.com
+      HBASE:
+        config:
+          hdfs_service: !!python/object/apply:string.join [[HDFS, *base_cluster_name], '-']
+          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *base_cluster_name], '-']
+          hbase_thriftserver_http: true
+          hbase_thriftserver_support_proxyuser: true
+        roles:
+          - group: MASTER
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+          - group: REGIONSERVER
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+              - cloudera-cluster-master-node.vagrantup.com
+          - group: HBASETHRIFTSERVER
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+              - cloudera-cluster-master-node.vagrantup.com
+          - group: HBASERESTSERVER
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+          - group: GATEWAY
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+              - cloudera-cluster-master-node.vagrantup.com
+      HIVE:
+        config:
+          hive_metastore_database_host: cloudera-cluster-cloudera-manager.vagrantup.com
+          hive_metastore_database_name: metastore
+          hive_metastore_database_user: hive
+          hive_metastore_database_password: yMsSaAt2gPbHcKjf
+          hive_metastore_database_port: 3306
+          hive_metastore_database_type: mysql
+          mapreduce_yarn_service: !!python/object/apply:string.join [[YARN, *base_cluster_name], '-']
+          spark_on_yarn_service: SPARK_ON_!!python/object/apply:string.join [[YARN, *base_cluster_name], '-']
+          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *base_cluster_name], '-']
+          sentry_service: !!python/object/apply:string.join [[SENTRY, *base_cluster_name], '-']
+          hbase_service: !!python/object/apply:string.join [[HBASE, *base_cluster_name], '-']
+        roles:
+          - group: HIVEMETASTORE
+            config:
+              hive_metastore_java_heapsize: 128306784
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+          - group: HIVESERVER2
+            config:
+              hiveserver2_enable_impersonation: false
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+          - group: WEBHCAT
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+          - group: GATEWAY
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+              - cloudera-cluster-master-node.vagrantup.com
+      IMPALA:
+        config:
+          hdfs_service: !!python/object/apply:string.join [[HDFS, *base_cluster_name], '-']
+          hive_service: !!python/object/apply:string.join [[HIVE, *base_cluster_name], '-']
+          hbase_service: !!python/object/apply:string.join [[HBASE, *base_cluster_name], '-']
+          sentry_service: !!python/object/apply:string.join [[SENTRY, *base_cluster_name], '-']
+        roles:
+          - group: STATESTORE
+            hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
 
-		  - group: IMPALAD
-			hosts:
-              - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-	  FLUME:
-		config:
-		  hdfs_service: HDFS-BASECDH
-		  hbase_service: HBASE-BASECDH
-		roles:
-		  - group: AGENT
-			hosts:
+          - group: CATALOGSERVER
+            hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
 
-	  OOZIE:
-		config:
-		  mapreduce_yarn_service: YARN-BASECDH
-		  zookeeper_service: ZOOKEEPER-BASECDH
-		  hive_service: HIVE-BASECDH
-		roles:
-		  - group: OOZIE_SERVER
-			hosts:
+          - group: IMPALAD
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+              - cloudera-cluster-master-node.vagrantup.com
+      FLUME:
+        config:
+          hdfs_service: !!python/object/apply:string.join [[HDFS, *base_cluster_name], '-']
+          hbase_service: !!python/object/apply:string.join [[HBASE, *base_cluster_name], '-']
+        roles:
+          - group: AGENT
+            hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
 
-			config:
-			  oozie_database_host: cloudera-cluster-cloudera-manager.vagrantup.com
-			  oozie_database_name: oozie
-			  oozie_database_user: oozie
-			  oozie_database_password: Es47hqQVZhAzyWxd
-			  oozie_database_type: mysql
-	  SOLR:
-		config:
-		  hdfs_service: HDFS-BASECDH
-		  zookeeper_service: ZOOKEEPER-BASECDH
-		roles:
-		  - group: SOLR_SERVER
-			hosts:
-			  - cloudera-cluster-cloudera-manager.vagrantup.com
-		  - group: GATEWAY
-			hosts:
-			  - cloudera-cluster-cloudera-manager.vagrantup.com
-	  HUE:
-		config:
-		  hive_service: HIVE-BASECDH
-		  hbase_service: HBASE-BASECDH
-		  impala_service: IMPALA-BASECDH
-		  oozie_service: OOZIE-BASECDH
-		  sqoop_service: SQOOP-BASECDH
-		  solr_service: SOLR-BASECDH
-		  sentry_service: SENTRY-BASECDH
-		  zookeeper_service: ZOOKEEPER-BASECDH
-		  hue_webhdfs: HDFS-BASECDH_NAMENODE_1
-		  hue_hbase_thrift: HBASE-BASECDH_HBASETHRIFTSERVER_1
-		  #auth_backend: desktop.auth.backend.PamBackend
-		  database_host: cloudera-cluster-cloudera-manager.vagrantup.com
-		  database_name: hue
-		  database_user: hue
-		  database_password: 5Dca4UfCPDy9m6pV
-		  database_type: mysql
-		  database_port: 3306
-		roles:
-		  - group: HUE_SERVER
-			config:
-			  hue_server_bind_wildcard: true
-			hosts:
-			  - cloudera-cluster-cloudera-manager.vagrantup.com
+      OOZIE:
+        config:
+          mapreduce_yarn_service: !!python/object/apply:string.join [[YARN, *base_cluster_name], '-']
+          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *base_cluster_name], '-']
+          hive_service: !!python/object/apply:string.join [[HIVE, *base_cluster_name], '-']
+        roles:
+          - group: OOZIE_SERVER
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
 
-	  SENTRY:
-		config:
-		  zookeeper_service: ZOOKEEPER-BASECDH
-		  hdfs_service: HDFS-BASECDH
-		  sentry_server_database_host: cloudera-cluster-cloudera-manager.vagrantup.com
-		  sentry_server_database_name: sentry
-		  sentry_server_database_user: sentry
-		  sentry_server_database_password: ZKuTK9fq5G8dRqKe
-		  sentry_server_database_type: mysql
-		roles:
-		  - group: SENTRY_SERVER
-			hosts:
-			  - cloudera-cluster-cloudera-manager.vagrantup.com
-		  - group: GATEWAY
-			hosts:
-			  - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
+            config:
+              oozie_database_host: cloudera-cluster-cloudera-manager.vagrantup.com
+              oozie_database_name: oozie
+              oozie_database_user: oozie
+              oozie_database_password: Es47hqQVZhAzyWxd
+              oozie_database_type: mysql
+      SOLR:
+        config:
+          hdfs_service: !!python/object/apply:string.join [[HDFS, *base_cluster_name], '-']
+          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *base_cluster_name], '-']
+        roles:
+          - group: SOLR_SERVER
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+          - group: GATEWAY
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+      HUE:
+        config:
+          hive_service: !!python/object/apply:string.join [[HIVE, *base_cluster_name], '-']
+          hbase_service: !!python/object/apply:string.join [[HBASE, *base_cluster_name], '-']
+          impala_service: !!python/object/apply:string.join [[IMPALA, *base_cluster_name], '-']
+          oozie_service: !!python/object/apply:string.join [[OOZIE, *base_cluster_name], '-']
+          sqoop_service: !!python/object/apply:string.join [[SQOOP, *base_cluster_name], '-']
+          solr_service: !!python/object/apply:string.join [[SOLR, *base_cluster_name], '-']
+          sentry_service: !!python/object/apply:string.join [[SENTRY, *base_cluster_name], '-']
+          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *base_cluster_name], '-']
+          hue_webhdfs: !!python/object/apply:string.join [[!!python/object/apply:string.join [[HDFS, *base_cluster_name], '-'], _NAMENODE_1], '']
+          hue_hbase_thrift: !!python/object/apply:string.join [[!!python/object/apply:string.join [[HBASE, *base_cluster_name], '-'], _HBASETHRIFTSERVER_1], '']
+          #auth_backend: desktop.auth.backend.PamBackend
+          database_host: cloudera-cluster-cloudera-manager.vagrantup.com
+          database_name: hue
+          database_user: hue
+          database_password: 5Dca4UfCPDy9m6pV
+          database_type: mysql
+          database_port: 3306
+        roles:
+          - group: HUE_SERVER
+            config:
+              hue_server_bind_wildcard: true
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
 
-	  SQOOP:
-		config:
-		  mapreduce_yarn_service: YARN-BASECDH
-		roles:
-		  - group: SQOOP_SERVER
-			config:
-			  sqoop_java_heapsize: 207881018
-			hosts:
-			  - cloudera-cluster-cloudera-manager.vagrantup.com
+      SENTRY:
+        config:
+          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *base_cluster_name], '-']
+          hdfs_service: !!python/object/apply:string.join [[HDFS, *base_cluster_name], '-']
+          sentry_server_database_host: cloudera-cluster-cloudera-manager.vagrantup.com
+          sentry_server_database_name: sentry
+          sentry_server_database_user: sentry
+          sentry_server_database_password: ZKuTK9fq5G8dRqKe
+          sentry_server_database_type: mysql
+        roles:
+          - group: SENTRY_SERVER
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+          - group: GATEWAY
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+              - cloudera-cluster-master-node.vagrantup.com
 
-#
-#  # Zookeeper Cluster cluster information
-#  - cluster: ZKCDH
-#    services_to_install: ['Zookeeper', 'Kafka']
-#    cluster_display_name: Zookeeper/Kafka Cluster
-#    version: CDH5
-#    fullVersion: 5.12.2
-#    hosts: ["cloudera-cluster-master-node.vagrantup.com"]
-#
-#    # Parcels
-#    parcels:
-#      - repo_cdh:
-#        product: CDH
-#        version: 5.12.2-1.cdh5.12.2.p0.4
-#      - repo_kafka:
-#        product: KAFKA
-#        version: 3.0.0-1.3.0.0.p0.40
-#
-#    # Service. All the service definitions go here
-#    services:
-#      ZOOKEEPER:
-#        config:
-#          zookeeper_datadir_autocreate: true
-#        roles:
-#          - group: SERVER
-#            hosts:
-#              - cloudera-cluster-master-node.vagrantup.com
-#            config:
-#              quorumPort: 2888
-#              electionPort: 3888
-#              dataLogDir: /var/lib/zookeeper
-#              dataDir: /var/lib/zookeeper
-#
-#      KAFKA:
-#        config:
-#          zookeeper_service: ZOOKEEPER-ZKCDH
-#          zookeeper.chroot: /kafka
-#          default.replication.factor: 3
-#        roles:
-#          - group: KAFKA_BROKER
-#            config:
-#              log.dirs: /datastore/hadoop/kafka/data
-#              broker_max_heap_size: 1024
-#            hosts:
-#              - cloudera-cluster-master-node.vagrantup.com
+      SQOOP:
+        config:
+          mapreduce_yarn_service: !!python/object/apply:string.join [[YARN, *base_cluster_name], '-']
+        roles:
+          - group: SQOOP_SERVER
+            config:
+              sqoop_java_heapsize: 207881018
+            hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+
+
+  # Zookeeper Cluster cluster information
+  - cluster:  &zk_cluster_name !!python/object/apply:string.upper [ZKCDH]
+    services_to_install: ['Zookeeper', 'Kafka']
+    cluster_display_name: Zookeeper/Kafka Cluster
+    version: CDH5
+    fullVersion: 5.12.2
+    hosts: ["cloudera-cluster-master-node.vagrantup.com"]
+
+    # Parcels
+    parcels:
+      - repo_cdh:
+        product: CDH
+        version: 5.12.2-1.cdh5.12.2.p0.4
+      - repo_kafka:
+        product: KAFKA
+        version: 3.0.0-1.3.0.0.p0.40
+
+    # Service. All the service definitions go here
+    services:
+      ZOOKEEPER:
+        config:
+          zookeeper_datadir_autocreate: true
+        roles:
+          - group: SERVER
+            hosts:
+              - cloudera-cluster-master-node.vagrantup.com
+            config:
+              quorumPort: 2888
+              electionPort: 3888
+              dataLogDir: /var/lib/zookeeper
+              dataDir: /var/lib/zookeeper
+
+      KAFKA:
+        config:
+          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *zk_cluster_name], '-']
+          zookeeper.chroot: /kafka
+          default.replication.factor: 3
+        roles:
+          - group: KAFKA_BROKER
+            config:
+              log.dirs: /datastore/hadoop/kafka/data
+              broker_max_heap_size: 1024
+            hosts:
+              - cloudera-cluster-master-node.vagrantup.com

@@ -68,7 +68,7 @@ host_installation:
 
 clusters:
   # Basic cluster information
-  - cluster: BaseCDH
+  - cluster: &cluster_name !!python/object/apply:string.upper [BaseCDH] # Keep this CAPTITAL as we will using this tin each role and service.
     services_to_install: ['Zookeeper', 'Kafka']
     cluster_display_name: Base CDH Cluster
     version: CDH5
@@ -103,7 +103,7 @@ clusters:
 
       KAFKA:
         config:
-          zookeeper_service: ZOOKEEPER-BASECDH
+          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *cluster_name], '-']
           zookeeper.chroot: /kafka
           default.replication.factor: 3
         roles:
@@ -114,50 +114,51 @@ clusters:
             hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
 
-	  HDFS:
-		config:
-		  dfs_replication: 2
-		  dfs_permissions: false
-		  dfs_block_local_path_access_user: impala,hbase,mapred,spark
-		  zookeeper_service: ZOOKEEPER-BASECDH
+      HDFS:
+        config:
+          dfs_replication: 2
+          dfs_permissions: false
+          dfs_block_local_path_access_user: impala,hbase,mapred,spark
+          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *cluster_name], '-']
 
-		roles:
-		  - group: NAMENODE
-			hosts:
+        roles:
+          - group: NAMENODE
+            hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-			config:
-			  dfs_name_dir_list: /datastore/hadoop/dfs/nn
-			  dfs_namenode_handler_count: 30
-			  dfs_federation_namenode_nameservice: hdfsHA
-			  dfs_namenode_quorum_journal_name: hdfsHA
-			  autofailover_enabled: true
-		  - group: JOURNALNODE
-			hosts:
+              - cloudera-cluster-master-node.vagrantup.com
+            config:
+              dfs_name_dir_list: /datastore/hadoop/dfs/nn
+              dfs_namenode_handler_count: 30
+              dfs_federation_namenode_nameservice: hdfsHA
+              dfs_namenode_quorum_journal_name: hdfsHA
+              autofailover_enabled: true
+          - group: JOURNALNODE
+            hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-			config:
-			  dfs_journalnode_edits_dir: /datastore/hadoop/journaldata/dfs/jn
-		  - group: FAILOVERCONTROLLER
-			hosts:
+              - cloudera-cluster-master-node.vagrantup.com
+            config:
+              dfs_journalnode_edits_dir: /datastore/hadoop/journaldata/dfs/jn
+          - group: FAILOVERCONTROLLER
+            hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-		  - group: DATANODE
-			hosts:
+              - cloudera-cluster-master-node.vagrantup.com
+          - group: DATANODE
+            hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-			config:
-			  dfs_data_dir_list: /datastore/hadoop/dfs/dn
-			  dfs_datanode_handler_count: 30
-			  #dfs_datanode_du_reserved: 1073741824
-			  dfs_datanode_failed_volumes_tolerated: 0
-			  dfs_datanode_data_dir_perm: 755
-		  - group: GATEWAY
-			hosts:
+              - cloudera-cluster-master-node.vagrantup.com
+            config:
+              dfs_data_dir_list: /datastore/hadoop/dfs/dn
+              dfs_datanode_handler_count: 30
+              #dfs_datanode_du_reserved: 1073741824
+              dfs_datanode_failed_volumes_tolerated: 0
+              dfs_datanode_data_dir_perm: 755
+          - group: GATEWAY
+            hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
-			  - cloudera-cluster-master-node.vagrantup.com
-			config:
-			  dfs_client_use_trash: true
+              - cloudera-cluster-master-node.vagrantup.com
+            config:
+              dfs_client_use_trash: true
+
 
 #  # Basic cluster information
 #  - cluster: ZKCDH
