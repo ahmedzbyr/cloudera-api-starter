@@ -78,6 +78,12 @@ def execute_cmd(func, service_name, timeout, fail_msg, *args, **kwargs):
 class ClouderaManagerSetup(object):
 
     def __init__(self, config, trial_version=True, license_information=None):
+        """
+            Getting the Core Ready
+        :param config:
+        :param trial_version:
+        :param license_information:
+        """
         self.config = config
         self.cluster = {}
         self.trial = trial_version
@@ -90,6 +96,10 @@ class ClouderaManagerSetup(object):
 
     @property
     def api_resource(self):
+        """
+            Get the API resource
+        :return:
+        """
         if self._api_resource is None:
             self._api_resource = ApiResource(self.config['cloudera_manager']['authentication']['host'],
                                              self.config['cloudera_manager']['authentication']['port'],
@@ -102,12 +112,19 @@ class ClouderaManagerSetup(object):
 
     @property
     def cloudera_manager_handle(self):
+        """
+            Get CM Handle
+        :return:
+        """
         if self._cloudera_manager_handle is None:
             self._cloudera_manager_handle = self.api_resource.get_cloudera_manager()
         return  self._cloudera_manager_handle
 
     def enable_trial_license_for_cm(self):
-
+        """
+            Setting TRIAL version by default
+        :return:
+        """
         try:
             cloudera_license = self.cloudera_manager_handle.get_license()
             logging.debug("Currently Lic Information: " + str(cloudera_license))
@@ -115,6 +132,10 @@ class ClouderaManagerSetup(object):
             self.cloudera_manager_handle.begin_trial()
 
     def update_adv_cm_config(self):
+        """
+            Update Advance Configuration on Cloudera Manager.
+        :return:
+        """
         self.cloudera_manager_handle.update_config(self.config['cloudera_manager']['cm_advance_config'])
 
     def host_installation(self):
@@ -215,8 +236,14 @@ class ClouderaManagerSetup(object):
             logging.ERROR("[MGMT] Cloudera Management services didn't start up properly")
 
     def setup(self):
+        """
+            Core Method to run the rest of the methods.
+        :return:
+        """
         self.enable_trial_license_for_cm()
         self.update_adv_cm_config()
+
+        # Currently commented as we are setting this up using Chef, but we can enable it as required.
         #self.host_installation()
         self.deploy_cloudera_management_services()
 
@@ -224,6 +251,12 @@ class ClouderaManagerSetup(object):
 class ParcelsSetup(object):
 
     def __init__(self, cluster_to_deploy, parcel_version, parcel_name='CDH'):
+        """
+            Parcel Setup.
+        :param cluster_to_deploy:
+        :param parcel_version:
+        :param parcel_name:
+        """
         self.cluster_to_deploy = cluster_to_deploy
         self.parcel_version = parcel_version
         self.parcel_name = parcel_name
@@ -236,11 +269,19 @@ class ParcelsSetup(object):
         return self.cluster_to_deploy.get_parcel(self.parcel_name, self.parcel_version)
 
     def check_for_parcel_error(self):
+        """
+            Check we have any errors on parcels.
+        :return:
+        """
         if self.parcel.state.errors:
             logging.error(self.parcel.state.errors)
             sys.exit(1)
 
     def check_parcel_availability (self):
+        """
+            Check AVAIL Parcels. This will use the Advance CM configuration from the YAML.
+        :return:
+        """
         logging.debug("Current State:" + str(self.parcel.stage))
         if self.parcel.stage in ['AVAILABLE_REMOTELY', 'DOWNLOADED', 'DOWNLOADING',
                                  'DISTRIBUTING', 'DISTRIBUTED', 'ACTIVATING', 'ACTIVATED']:
@@ -251,6 +292,11 @@ class ParcelsSetup(object):
 
     @retry(ApiException, tries=60, delay=10, backoff=1, logger=True)
     def check_parcel_state(self, current_state):
+        """
+            Retry and check the current state.
+        :param current_state:
+        :return:
+        """
         parcel = self.parcel
         self.check_for_parcel_error()
         if parcel.stage in current_state:
@@ -261,15 +307,27 @@ class ParcelsSetup(object):
             raise ApiException("Waiting for {}".format(current_state[0]))
 
     def parcel_download(self):
+        """
+            Download
+        :return:
+        """
         self.check_parcel_availability()
         self.parcel.start_download()
         self.check_parcel_state(['DOWNLOADED', 'DISTRIBUTED', 'ACTIVATED', 'INUSE'])
 
     def parcel_distribute(self):
+        """
+            Distribute
+        :return:
+        """
         self.parcel.start_distribution()
         self.check_parcel_state(['DISTRIBUTED', 'ACTIVATED', 'INUSE'])
 
     def parcel_activate(self):
+        """
+            Activate
+        :return:
+        """
         self.parcel.activate()
         self.check_parcel_state(['ACTIVATED', 'INUSE'])
 
@@ -277,13 +335,20 @@ class ParcelsSetup(object):
 class Clusters(ClouderaManagerSetup):
 
     def init_cluster(self):
-
+        """
+            INIT Clusters
+        :return:
+        """
         logging.debug(config['clusters'])
         for cluster_to_init in config['clusters']:
             self.initialize(cluster_to_init)
 
     def initialize(self, cluster_config):
-
+        """
+            Init Each cluster in the YAML
+        :param cluster_config:
+        :return:
+        """
         logging.debug(cluster_config['cluster'])
         try:
 
@@ -323,10 +388,14 @@ class Clusters(ClouderaManagerSetup):
             self.cluster[cluster_config['cluster']].rename(cluster_config['cluster_display_name'])
             self.cluster[cluster_config['cluster']].add_hosts(hosts)
         except ApiException:
-            logging.error("Cannot `add_hosts`, Please check of the host is already part of an existing cluster.")
+            logging.error("Cannot `add_hosts`, Please check if one or more of the hosts are NOT already part of an existing cluster.")
             sys.exit(1)
 
     def activate_parcels_all_cluster(self):
+        """
+            Activating all Parcels for all Clusters.
+        :return:
+        """
         for cluster_to_deploy in config['clusters']:
             logging.debug(cluster_to_deploy)
             for parcel_cfg in cluster_to_deploy['parcels']:
@@ -338,6 +407,11 @@ class Clusters(ClouderaManagerSetup):
 
     @retry(ApiException, tries=3, delay=10, backoff=1, logger=True)
     def cluster_deploy_client_config(self, cluster_to_deploy):
+        """
+            Deploy Client Config
+        :param cluster_to_deploy:
+        :return:
+        """
         command = cluster_to_deploy.deploy_client_config()
         if not command.wait(300).success:
             if command.resultMessage is not None and \
@@ -347,7 +421,14 @@ class Clusters(ClouderaManagerSetup):
                 raise ApiException('Retry Command')
 
     def deploy_services_on_cluster(self):
+        """
+            Deploy all services on all clustes using the BASE_HADOOP_SERVICES macro.
+        :return:
+        """
         for cluster_to_deploy in config['clusters']:
+            #
+            #   TODO: Need to make the `BASE_HADOOP_SERVICES` specific to each cluster.
+            #
             for cluster_services in BASE_HADOOP_SERVICES:
                 svc = getattr(sys.modules[__name__], cluster_services.capitalize())(self.cluster[cluster_to_deploy['cluster']],
                                 cluster_to_deploy['services'][cluster_services.upper()], cluster_to_deploy['cluster'])
@@ -369,6 +450,10 @@ class Clusters(ClouderaManagerSetup):
 
 
     def setup(self):
+        """
+            Setup the CLUSTERS
+        :return:
+        """
         self.init_cluster()
         self.activate_parcels_all_cluster()
         self.deploy_services_on_cluster()
@@ -377,6 +462,12 @@ class Clusters(ClouderaManagerSetup):
 class CoreServices(object):
 
     def __init__(self, cluster_to_deploy, service_config, cluster_name):
+        """
+            Setting up the common services
+        :param cluster_to_deploy:
+        :param service_config:
+        :param cluster_name:
+        """
         self.cluster_to_deploy = cluster_to_deploy
         self.service_config = service_config
         self.cluster_name = cluster_name
@@ -412,6 +503,14 @@ class CoreServices(object):
         return False
 
     def run_cmd(self, func, timeout, fail_msg, *args, **kwargs):
+        """
+        :param func: Function to execute
+        :param timeout: Timeout for the function
+        :param fail_msg: Failure message to display if the function fails
+        :param args: Further args are required
+        :param kwargs:
+        :return:
+        """
         execute_cmd(func, self.service_name, timeout, fail_msg, *args, **kwargs)
 
     def deploy_service(self):
@@ -436,6 +535,10 @@ class CoreServices(object):
 
     @retry(ApiException, tries=3, delay=30, backoff=2, logger=True)
     def service_start(self):
+        """
+            Starting Service
+        :return:
+        """
         # setting the private place holder to None
         self._service = None
         if not self.check_service_start:
@@ -452,7 +555,12 @@ class CoreServices(object):
         self._service = None
 
     def create_roles(self, role, group):
-
+        """
+            Creating ROLES.
+        :param role:
+        :param group:
+        :return:
+        """
         role_suffix = 0
         for host in role.get('hosts', []):
             role_suffix += 1
@@ -476,14 +584,15 @@ class CoreServices(object):
 
     def pre_start_configuration(self):
         """
-        Any service specific actions that needs to be performed before the cluster is started.
-        Each service subclass can implement and hook into the pre-start process.
+            Any services which require this will implement it in its own class.
+            As this will be different for each service.
         """
         pass
 
     def post_start_configuration(self):
         """
-        Post cluster start actions required to be performed on a per service basis.
+            Any services which require this will implement it in its own class.
+            As this will be different for each service.
         """
         pass
 
@@ -491,6 +600,13 @@ class CoreServices(object):
 class Zookeeper(CoreServices):
 
     def create_roles(self, role, group):
+        """
+            Creating Roles for zookeeper,
+            this is a little different for Zookeeper as we need to have id for each server.
+        :param role:
+        :param group:
+        :return:
+        """
         role_suffix = 0
         for host in role['hosts']:
             role_suffix += 1
@@ -514,12 +630,20 @@ class Zookeeper(CoreServices):
             role.update_config({'serverId': role_suffix})
 
     def pre_start_configuration(self):
+        """
+            Pre Start configuration to init the zookeeper.
+        """
         self.run_cmd(self.service.init_zookeeper, 30, 'Init Zookeeper Failed.')
 
 class Kafka(CoreServices):
     """
-    Service Role Groups:
+        Service Role Groups: Nothing to do here as this is same as the core services.
+        Further configuration will come from the YAML file.
         KAFKA_BROKER
+
+        We can further add MIRROR_MAKER and GATEWAY from the YAML file.
+        All we need to do is add the configuration in the YAML file.
+        
     """
 
 
