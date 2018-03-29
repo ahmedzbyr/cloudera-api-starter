@@ -448,17 +448,12 @@ class Clusters(ClouderaManagerSetup):
                 except ApiException:
                     pass
 
-            # for cluster_services in cluster_to_deploy['services_to_install']:
-            #     svc = getattr(sys.modules[__name__], cluster_services)(self.cluster[cluster_to_deploy['cluster']],
-            #                                                            cluster_to_deploy['services'][
-            #                                                                cluster_services.upper()],
-            #                                                            cluster_to_deploy['cluster'])
                 if not svc.check_service_start:
                     svc.service_start()
                     svc.post_start_configuration()
 
     @retry(ApiException, tries=3, delay=10, backoff=1, logger=True)
-    def restart_cluster(self):
+    def restart_stale_cluster(self):
         for cluster_to_restart in config['clusters']:
             command = self.cluster[cluster_to_restart['cluster']].restart(restart_only_stale_services=True, redeploy_client_configuration=True)
 
@@ -483,7 +478,7 @@ class Clusters(ClouderaManagerSetup):
         self.init_cluster()
         self.activate_parcels_all_cluster()
         self.deploy_services_on_cluster()
-        self.restart_cluster()
+        self.restart_stale_cluster()
 
 
 class CoreServices(object):
