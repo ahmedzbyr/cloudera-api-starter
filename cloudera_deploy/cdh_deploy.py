@@ -422,7 +422,8 @@ class Clusters(ClouderaManagerSetup):
             if command.resultMessage is not None and \
                     'There is already a pending command on this entity' in command.resultMessage:
                 raise ApiException('Retry Command')
-            if 'is not currently available for execution' in command.resultMessage:
+            if command.resultMessage is not None and \
+                    'is not currently available for execution' in command.resultMessage:
                 raise ApiException('Retry Command')
 
     def deploy_services_on_cluster(self):
@@ -442,19 +443,37 @@ class Clusters(ClouderaManagerSetup):
                     svc.deploy_service()
                     svc.pre_start_configuration()
 
-            try:
-                self.cluster_deploy_client_config(self.cluster[cluster_to_deploy['cluster']])
-            except ApiException:
-                pass
+                try:
+                    self.cluster_deploy_client_config(self.cluster[cluster_to_deploy['cluster']])
+                except ApiException:
+                    pass
 
-            for cluster_services in cluster_to_deploy['services_to_install']:
-                svc = getattr(sys.modules[__name__], cluster_services)(self.cluster[cluster_to_deploy['cluster']],
-                                                                       cluster_to_deploy['services'][
-                                                                           cluster_services.upper()],
-                                                                       cluster_to_deploy['cluster'])
+            # for cluster_services in cluster_to_deploy['services_to_install']:
+            #     svc = getattr(sys.modules[__name__], cluster_services)(self.cluster[cluster_to_deploy['cluster']],
+            #                                                            cluster_to_deploy['services'][
+            #                                                                cluster_services.upper()],
+            #                                                            cluster_to_deploy['cluster'])
                 if not svc.check_service_start:
                     svc.service_start()
                     svc.post_start_configuration()
+
+    @retry(ApiException, tries=3, delay=10, backoff=1, logger=True)
+    def restart_cluster(self):
+        for cluster_to_restart in config['clusters']:
+            command = self.cluster[cluster_to_restart['cluster']].restart(restart_only_stale_services=True, redeploy_client_configuration=True)
+
+            logging.debug("Response: " + str(command.resultMessage) + str(command.success))
+
+            if not command.wait(300).success:
+                if command.resultMessage is not None and \
+                        'There are no stale services in the cluster to restart.' in command.resultMessage:
+                    logging.debug("We dont need to try again")
+                elif command.resultMessage is not None and \
+                        'is not currently available for execution' in command.resultMessage:
+                    raise ApiException('Retry Command')
+                else:
+                    logging.debug("There are no stale services")
+                    continue
 
     def setup(self):
         """
@@ -464,6 +483,7 @@ class Clusters(ClouderaManagerSetup):
         self.init_cluster()
         self.activate_parcels_all_cluster()
         self.deploy_services_on_cluster()
+        self.restart_cluster()
 
 
 class CoreServices(object):

@@ -73,17 +73,19 @@ clusters:
     cluster_display_name: Base CDH Cluster
     version: CDH5
     fullVersion: 5.12.2
-    hosts: ["cloudera-cluster-cloudera-manager.vagrantup.com", "cloudera-cluster-master-node.vagrantup.com"]
-
+    hosts:
+      - cloudera-cluster-cloudera-manager.vagrantup.com
+      - cloudera-cluster-master-node.vagrantup.com
+      - cloudera-cluster-standby-node.vagrantup.com
 
     # Parcels
     parcels:
       - repo_cdh:
         product: CDH
         version: 5.12.2-1.cdh5.12.2.p0.4
-      - repo_kafka:
-        product: KAFKA
-        version: 3.0.0-1.3.0.0.p0.40
+#      - repo_kafka:
+#        product: KAFKA
+#        version: 3.0.0-1.3.0.0.p0.40
 
 
     # Service. All the service definitions go here
@@ -96,24 +98,25 @@ clusters:
             hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
               - cloudera-cluster-master-node.vagrantup.com
+              - cloudera-cluster-standby-node.vagrantup.com
             config:
               quorumPort: 2888
               electionPort: 3888
               dataLogDir: /var/lib/zookeeper
               dataDir: /var/lib/zookeeper
 
-      KAFKA:
-        config:
-          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *base_cluster_name], '-']
-          zookeeper.chroot: /kafka
-          default.replication.factor: 3
-        roles:
-          - group: KAFKA_BROKER
-            config:
-              log.dirs: /datastore/hadoop/kafka/data
-              broker_max_heap_size: 1024
-            hosts:
-              - cloudera-cluster-cloudera-manager.vagrantup.com
+#      KAFKA:
+#        config:
+#          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *base_cluster_name], '-']
+#          zookeeper.chroot: /kafka
+#          default.replication.factor: 3
+#        roles:
+#          - group: KAFKA_BROKER
+#            config:
+#              log.dirs: /datastore/hadoop/kafka/data
+#              broker_max_heap_size: 1024
+#            hosts:
+#              - cloudera-cluster-cloudera-manager.vagrantup.com
 
       HDFS:
         config:
@@ -137,8 +140,9 @@ clusters:
             hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
               - cloudera-cluster-master-node.vagrantup.com
+              - cloudera-cluster-standby-node.vagrantup.com
             config:
-              dfs_journalnode_edits_dir: /datastore/hadoop/journaldata/dfs/jn
+              dfs_journalnode_edits_dir: /datastore/hadoop/dfs/jn
           - group: FAILOVERCONTROLLER
             hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
@@ -147,6 +151,7 @@ clusters:
             hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
               - cloudera-cluster-master-node.vagrantup.com
+              - cloudera-cluster-standby-node.vagrantup.com
             config:
               dfs_data_dir_list: /datastore/hadoop/dfs/dn
               dfs_datanode_handler_count: 30
@@ -156,6 +161,7 @@ clusters:
             hosts:
               - cloudera-cluster-cloudera-manager.vagrantup.com
               - cloudera-cluster-master-node.vagrantup.com
+              - cloudera-cluster-standby-node.vagrantup.com
             config:
               dfs_client_use_trash: true
 
