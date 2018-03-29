@@ -1,4 +1,6 @@
+#
 # Cloudera Manager config
+#
 
 cloudera_manager:
 
@@ -54,6 +56,9 @@ cloudera_manager:
             headlamp_database_type: mysql
             headlamp_database_name: rman
 
+#
+# Host Installation
+#
 host_installation:
   authentication:
     host_username: cmadmin
@@ -65,11 +70,13 @@ host_installation:
     host_unlimited_jce_policy: true
     host_parallel_install_count: 10
 
-
+#
+# Configuration for each cluster.
+#
 clusters:
   # Basic cluster information
   - cluster: &base_cluster_name !!python/object/apply:string.upper [BaseCDH] # Keep this CAPTITAL as we will using this tin each role and service.
-    services_to_install: ['Zookeeper', 'Hdfs']
+    services_to_install: ['Zookeeper', 'Kafka']
     cluster_display_name: Base CDH Cluster
     version: CDH5
     fullVersion: 5.12.2
@@ -83,9 +90,9 @@ clusters:
       - repo_cdh:
         product: CDH
         version: 5.12.2-1.cdh5.12.2.p0.4
-#      - repo_kafka:
-#        product: KAFKA
-#        version: 3.0.0-1.3.0.0.p0.40
+     - repo_kafka:
+       product: KAFKA
+       version: 3.0.0-1.3.0.0.p0.40
 
 
     # Service. All the service definitions go here
@@ -105,18 +112,20 @@ clusters:
               dataLogDir: /var/lib/zookeeper
               dataDir: /var/lib/zookeeper
 
-#      KAFKA:
-#        config:
-#          zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *base_cluster_name], '-']
-#          zookeeper.chroot: /kafka
-#          default.replication.factor: 3
-#        roles:
-#          - group: KAFKA_BROKER
-#            config:
-#              log.dirs: /datastore/hadoop/kafka/data
-#              broker_max_heap_size: 1024
-#            hosts:
-#              - cloudera-cluster-cloudera-manager.vagrantup.com
+     KAFKA:
+       config:
+         zookeeper_service: !!python/object/apply:string.join [[ZOOKEEPER, *base_cluster_name], '-']
+         zookeeper.chroot: /kafka
+         default.replication.factor: 3
+       roles:
+         - group: KAFKA_BROKER
+           config:
+             log.dirs: /datastore/hadoop/kafka/data
+             broker_max_heap_size: 1024
+           hosts:
+              - cloudera-cluster-cloudera-manager.vagrantup.com
+              - cloudera-cluster-master-node.vagrantup.com
+              - cloudera-cluster-standby-node.vagrantup.com
 
       HDFS:
         config:

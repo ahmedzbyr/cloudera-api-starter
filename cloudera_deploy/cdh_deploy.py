@@ -1,4 +1,8 @@
 #
+# Cloudera Autoamation Script.
+#
+
+#
 # Importing required modules.
 #
 import time, sys, yaml, logging, argparse
@@ -8,7 +12,9 @@ import os
 from functools import wraps
 from cm_api.endpoints.services import ApiServiceSetupInfo, ApiBulkCommandList
 
-
+#
+# retry function
+#
 def retry(exception_to_check=ApiException, tries=4, delay=3, backoff=2, logger=None):
     """Retry calling the decorated function using an exponential backoff.
 
@@ -51,7 +57,10 @@ def retry(exception_to_check=ApiException, tries=4, delay=3, backoff=2, logger=N
 
     return deco_retry
 
-
+#
+# Execute Commands
+#   Courtesy: https://github.com/objectrocket/ansible-hadoop
+#
 @retry(ApiException, tries=3, delay=30, backoff=1, logger=True)
 def execute_cmd(func, service_name, timeout, fail_msg, *args, **kwargs):
     """
@@ -335,9 +344,14 @@ class ParcelsSetup(object):
         self.parcel.activate()
         self.check_parcel_state(['ACTIVATED', 'INUSE'])
 
-
+#
+# Cluster Deployment
+#
 class Clusters(ClouderaManagerSetup):
 
+    #
+    # Init Cluster to deploy
+    #
     def init_cluster(self):
         """
             INIT Clusters
@@ -347,6 +361,9 @@ class Clusters(ClouderaManagerSetup):
         for cluster_to_init in config['clusters']:
             self.initialize(cluster_to_init)
 
+    #
+    # Initialize each cluster.
+    #
     def initialize(self, cluster_config):
         """
             Init Each cluster in the YAML
@@ -396,6 +413,9 @@ class Clusters(ClouderaManagerSetup):
                 "Cannot `add_hosts`, Please check if one or more of the hosts are NOT already part of an existing cluster.")
             sys.exit(1)
 
+    #
+    # Activating all parcels on all clusters.
+    #
     def activate_parcels_all_cluster(self):
         """
             Activating all Parcels for all Clusters.
@@ -410,6 +430,9 @@ class Clusters(ClouderaManagerSetup):
                 parcel.parcel_distribute()
                 parcel.parcel_activate()
 
+    #
+    # Deploy client configuration.
+    #
     @retry(ApiException, tries=3, delay=10, backoff=1, logger=True)
     def cluster_deploy_client_config(self, cluster_to_deploy):
         """
@@ -426,6 +449,9 @@ class Clusters(ClouderaManagerSetup):
                     'is not currently available for execution' in command.resultMessage:
                 raise ApiException('Retry Command')
 
+    #
+    # Deploy services on cluster.
+    #
     def deploy_services_on_cluster(self):
         """
             Deploy all services on all clustes using the BASE_HADOOP_SERVICES macro.
@@ -452,6 +478,9 @@ class Clusters(ClouderaManagerSetup):
                     svc.service_start()
                     svc.post_start_configuration()
 
+    #
+    # Restart cluster if we have stale configurations
+    #
     @retry(ApiException, tries=3, delay=10, backoff=1, logger=True)
     def restart_stale_cluster(self):
         for cluster_to_restart in config['clusters']:
@@ -470,6 +499,9 @@ class Clusters(ClouderaManagerSetup):
                     logging.debug("There are no stale services")
                     continue
 
+    #
+    # Cluster setup.
+    #
     def setup(self):
         """
             Setup the CLUSTERS
@@ -481,8 +513,14 @@ class Clusters(ClouderaManagerSetup):
         self.restart_stale_cluster()
 
 
+#
+# Core service which is common for all the service deployments
+#
 class CoreServices(object):
 
+    #
+    # __init__
+    #
     def __init__(self, cluster_to_deploy, service_config, cluster_name):
         """
             Setting up the common services
@@ -495,14 +533,22 @@ class CoreServices(object):
         self.cluster_name = cluster_name
         self._service = None
 
+    # Class name in CAPS
     @property
     def service_type(self):
         return self.__class__.__name__.upper()
 
+    #
+    # Service name, we are adding the cluster name to make it unique
+    #   in the cluster.
+    #
     @property
     def service_name(self):
         return self.service_type + '-' + str(self.cluster_name)
 
+    #
+    # Setting up service
+    #
     @property
     def service(self):
         if self._service is not None:
@@ -515,6 +561,9 @@ class CoreServices(object):
             logging.debug("Service {0} created on cluster".format(self.service_name))
         return self._service
 
+    #
+    # Check if the service is started.
+    #
     @property
     def check_service_start(self):
         if self.service.serviceState == 'STARTED':
@@ -524,6 +573,10 @@ class CoreServices(object):
             return True
         return False
 
+    #
+    # run_cmd
+    #   Courtesy: https://github.com/objectrocket/ansible-hadoop
+    #
     def run_cmd(self, func, timeout, fail_msg, *args, **kwargs):
         """
         :param func: Function to execute
@@ -535,6 +588,9 @@ class CoreServices(object):
         """
         execute_cmd(func, self.service_name, timeout, fail_msg, *args, **kwargs)
 
+    #
+    # deploy services
+    #
     def deploy_service(self):
         """
         Update group configs. Create roles and update role specific configs.
@@ -555,6 +611,9 @@ class CoreServices(object):
             role_group.update_config(role.get('config', {}))
             self.create_roles(role, group)
 
+    #
+    # Starting service
+    #
     @retry(ApiException, tries=3, delay=30, backoff=2, logger=True)
     def service_start(self):
         """
@@ -576,6 +635,9 @@ class CoreServices(object):
         # Making sure the place holder is None
         self._service = None
 
+    #
+    # Creating role
+    #
     def create_roles(self, role, group):
         """
             Creating ROLES.
@@ -604,6 +666,9 @@ class CoreServices(object):
             except ApiException:
                 self.service.create_role(role_name, group, host)
 
+    #
+    # Pre Config
+    #
     def pre_start_configuration(self):
         """
             Any services which require this will implement it in its own class.
@@ -611,6 +676,9 @@ class CoreServices(object):
         """
         pass
 
+    #
+    # Post Config
+    #
     def post_start_configuration(self):
         """
             Any services which require this will implement it in its own class.
@@ -618,9 +686,14 @@ class CoreServices(object):
         """
         pass
 
-
+#
+# ZOOKEEPER
+#
 class Zookeeper(CoreServices):
 
+    #
+    # Override create_roles
+    #
     def create_roles(self, role, group):
         """
             Creating Roles for zookeeper,
@@ -651,13 +724,18 @@ class Zookeeper(CoreServices):
                 role = self.service.create_role(role_name, group, host)
             role.update_config({'serverId': role_suffix})
 
+    #
+    # Pre start configuration
+    #
     def pre_start_configuration(self):
         """
             Pre Start configuration to init the zookeeper.
         """
         self.run_cmd(self.service.init_zookeeper, 30, 'Init Zookeeper FAILED.')
 
-
+#
+# KAFKA
+#
 class Kafka(CoreServices):
     """
         Service Role Groups: Nothing to do here as this is same as the core services.
@@ -670,8 +748,14 @@ class Kafka(CoreServices):
         Kafka Service
     """
 
-
+#
+# HDFS
+#
 class Hdfs(CoreServices):
+
+    #
+    # property for service
+    #
 
     @property
     def active_namenode(self):
@@ -697,9 +781,15 @@ class Hdfs(CoreServices):
         except ApiException:
             return True
 
+    #
+    # format NN
+    #
     def format_namenode(self):
         self.run_cmd(self.service.format_hdfs, 300, "FAILED formatting HDFS, Continuing ...", self.active_namenode)
 
+    #
+    # Prestart
+    #
     def pre_start_configuration(self):
         if not self.ha:
             self.format_namenode()
@@ -715,40 +805,56 @@ class Hdfs(CoreServices):
         self.run_cmd(self.service.start_roles, 300, "Service start FAILED", self.failover_primary)
         self.run_cmd(self.service.start_roles, 300, "Service start FAILED", self.failover_secondary)
 
+    #
+    # Post Start
+    #
     def post_start_configuration(self):
         self.run_cmd(self.service.create_hdfs_tmp, 60, "Command CreateHdfsTmp FAILED")
 
 
+#
+# YARN
+#
 class Yarn(CoreServices):
     def pre_start_configuration(self):
         self.run_cmd(self.service.create_yarn_job_history_dir, 60, "Command Create Job History Dir failed")
         self.run_cmd(self.service.create_yarn_node_manager_remote_app_log_dir, 60, "Command Create NodeManager app dir failed")
 
-
+#
+# SPARK_ON_YARN
+#
 class Spark_On_Yarn(CoreServices):
     def pre_start_configuration(self):
         self.run_cmd(self.service._cmd, 60, "Cmd CreateSparkUserDir failed", 'CreateSparkUserDirCommand', api_version=7)
         self.run_cmd(self.service._cmd, 60, "Cmd CreateSparkHistoryDirCommand failed", 'CreateSparkHistoryDirCommand', api_version=7)
         self.run_cmd(self.service._cmd, 60, "Cmd SparkUploadJarServiceCommand failed", 'SparkUploadJarServiceCommand', api_version=7)
 
-
+#
+# HBASE
+#
 class Hbase(CoreServices):
     def pre_start_configuration(self):
         self.run_cmd(self.service.create_hbase_root, 60, "Command CreateHbaseRoot failed")
 
-
+#
+# HIVE
+#
 class Hive(CoreServices):
     def pre_start_configuration(self):
         self.run_cmd(self.service.create_hive_warehouse, 60, "Command CreateHiveWarehouse failed")
         self.run_cmd(self.service.create_hive_metastore_database, 60, "Command CreateHiveMetastoreDatabase failed")
         self.run_cmd(self.service.create_hive_metastore_tables, 60, "Command CreateHiveMetastoreTables failed")
 
-
+#
+# IMPALA
+#
 class Impala(CoreServices):
     def pre_start_configuration(self):
         self.run_cmd(self.service.create_impala_user_dir, 60, "Command CreateImpalaUserDir failed")
 
-
+#
+# FLUME
+#
 class Flume(CoreServices):
     """
         Service Role Groups: Nothing to do here as this is same as the core services.
@@ -757,6 +863,9 @@ class Flume(CoreServices):
         Flume service
     """
 
+#
+# HUE
+#
 class Hue(CoreServices):
     """
         Service Role Groups: Nothing to do here as this is same as the core services.
@@ -765,28 +874,40 @@ class Hue(CoreServices):
         Hue Service
     """
 
+#
+# OOZIE
+#
 class Oozie(CoreServices):
     def pre_start_configuration(self):
         self.run_cmd(self.service.create_oozie_db, 300, "Command CreateOozieSchema failed")
         self.run_cmd(self.service.install_oozie_sharelib, 300, "Command InstallOozieSharedLib failed")
 
-
+#
+# SQOOP
+#
 class Sqoop(CoreServices):
     def pre_start_configuration(self):
         self.run_cmd(self.service.create_sqoop_user_dir, 300, "Command CreateSqoopUserDir failed")
         self.run_cmd(self.service.create_sqoop_database_tables, 300, "Command CreateSqoopDBTables failed")
 
-
+#
+# SOLR
+#
 class Solr(CoreServices):
     def pre_start_configuration(self):
         self.run_cmd(self.service.init_solr, 300, "Command InitSolr failed")
         self.run_cmd(self.service.create_solr_hdfs_home_dir, 300, "Command CreateSolrHdfsHomeDir failed")
 
-
+#
+# SENTRY
+#
 class Sentry(CoreServices):
     def pre_start_configuration(self):
         self.run_cmd(self.service.create_sentry_database_tables, 300, "Command CreateSentryDBTables failed")
 
+#
+# MAIN 
+#
 if __name__ == '__main__':
 
     command_line_opt = argparse.ArgumentParser("Setting up cloudera cluster using automation script.")
