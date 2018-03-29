@@ -380,7 +380,7 @@ class Clusters(ClouderaManagerSetup):
         except ApiException:
             self.cluster[cluster_config['cluster']] = self.api_resource.create_cluster(cluster_config['cluster'],
                                                                                        cluster_config['version'],
-                                                                                       cluster_config['fullVersion'])
+                                                                                       cluster_config['full_version'])
 
             logging.debug("Cluster Created:" + str(self.cluster))
 
@@ -906,7 +906,7 @@ class Sentry(CoreServices):
         self.run_cmd(self.service.create_sentry_database_tables, 300, "Command CreateSentryDBTables failed")
 
 #
-# MAIN 
+# MAIN
 #
 if __name__ == '__main__':
 

@@ -79,7 +79,7 @@ clusters:
     services_to_install: ['Zookeeper', 'Kafka']
     cluster_display_name: Base CDH Cluster
     version: CDH5
-    fullVersion: 5.12.2
+    full_version: 5.12.2
     hosts:
       - cloudera-cluster-cloudera-manager.vagrantup.com
       - cloudera-cluster-master-node.vagrantup.com
