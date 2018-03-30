@@ -403,10 +403,11 @@ class Clusters(ClouderaManagerSetup):
         logging.info("Adding new nodes:" + str(hosts))
 
         #
-        # Adding all hosts to the cluster.
+        # Adding all hosts to the cluster. role.get('config', {})
         #
         try:
-            self.cluster[cluster_config['cluster']].rename(cluster_config['cluster_display_name'])
+            self.cluster[cluster_config['cluster']].rename(cluster_config.get('cluster_display_name',
+                                                                              cluster_config['cluster']))
             self.cluster[cluster_config['cluster']].add_hosts(hosts)
         except ApiException:
             logging.error(
