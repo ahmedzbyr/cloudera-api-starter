@@ -843,7 +843,8 @@ class Hbase(CoreServices):
 class Hive(CoreServices):
     def pre_start_configuration(self):
         self.run_cmd(self.service.create_hive_warehouse, 60, "Command CreateHiveWarehouse failed")
-        self.run_cmd(self.service.create_hive_metastore_database, 60, "Command CreateHiveMetastoreDatabase failed")
+        # Since we create the database in mysql we dont need this. 
+        # self.run_cmd(self.service.create_hive_metastore_database, 60, "Command CreateHiveMetastoreDatabase failed")
         self.run_cmd(self.service.create_hive_metastore_tables, 60, "Command CreateHiveMetastoreTables failed")
 
 #
